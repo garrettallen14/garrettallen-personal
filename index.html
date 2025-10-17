@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garrett Allen</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.65;
+            color: #000;
+            background-color: #fff;
+            margin: 0;
+            padding: 60px 20px;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2em;
+            gap: 2em;
+        }
+
+        .header-text {
+            flex: 1;
+        }
+
+        .profile-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #ccc;
+            flex-shrink: 0;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            font-weight: normal;
+            margin-bottom: 0.3em;
+        }
+
+        .subtitle {
+            font-size: 1em;
+            margin-bottom: 0.3em;
+            color: #333;
+        }
+
+        .location {
+            font-size: 0.95em;
+            color: #666;
+        }
+
+        .section {
+            margin-bottom: 2em;
+        }
+
+        .section-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 0.5em;
+            margin-top: 1.5em;
+        }
+
+        .content {
+            font-size: 1em;
+            text-align: justify;
+        }
+
+        .content p {
+            margin-bottom: 1em;
+        }
+
+        .interests {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0.5em 0;
+        }
+
+        .interests li {
+            margin-bottom: 0.3em;
+        }
+
+        .interests li:before {
+            content: "• ";
+            margin-right: 0.5em;
+        }
+
+        .projects {
+            margin-top: 1em;
+        }
+
+        .project {
+            margin-bottom: 1em;
+        }
+
+        .project-title {
+            font-weight: bold;
+        }
+
+        .project-description {
+            margin-top: 0.2em;
+            color: #333;
+        }
+
+        a {
+            color: #000;
+            text-decoration: none;
+            border-bottom: 1px solid #000;
+        }
+
+        a:hover {
+            border-bottom: 2px solid #000;
+        }
+
+        footer {
+            margin-top: 3em;
+            padding-top: 1.5em;
+            border-top: 1px solid #ccc;
+            font-size: 0.9em;
+            color: #666;
+            text-align: center;
+        }
+
+        .footer-image-container {
+            margin-top: 2em;
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .footer-image {
+            display: block;
+            width: 35%;
+            max-width: 100%;
+            height: auto;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-text">
+                <h1>Garrett Allen</h1>
+                <div class="subtitle">AI Infrastructure Engineer</div>
+                <div class="location">San Francisco, CA</div>
+            </div>
+            <img src="profile.jpg" alt="Garrett Allen" class="profile-image">
+        </div>
+        
+        <div class="section">
+            <div class="content">
+                <p>
+                    Founding AI Engineer at <a href="https://layerlens.ai" target="_blank">LayerLens.ai</a> 
+                    with research interests in world models and machine agency. Experienced in designing multi-turn 
+                    evaluation frameworks, shipping benchmarking systems at production scale, and building reliable 
+                    infrastructure for LLMs and agents.
+                </p>
+                <p>
+                    Previously, I graduated from the University of Southern California with a degree in Mathematics 
+                    and competed as a Division I NCAA Men's Water Polo athlete, earning MPSF Scholar Athlete honors 
+                    and three consecutive NCAA Championship appearances. My work focuses on bridging AI research and 
+                    real-world products, with particular emphasis on agent evaluation and LLM infrastructure.
+                </p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Favorite Links</div>
+            <div class="content">
+                <p>
+                    <strong>Papers:</strong> 
+                    <a href="https://arxiv.org/abs/2302.06692" target="_blank">JEPA</a>, 
+                    <a href="https://arxiv.org/abs/2402.10200" target="_blank">CoT Without Prompting</a>, 
+                    <a href="https://arxiv.org/abs/2210.03629" target="_blank">Scaling Instruction-Finetuned LMs</a>
+                </p>
+                <p>
+                    <strong>Resources:</strong> 
+                    <a href="https://github.com/garrettallen14/paper-a-day" target="_blank">My Paper Notes</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Selected Projects</div>
+            <div class="projects">
+                <div class="project">
+                    <div class="project-title">
+                        <a href="https://app.layerlens.ai/" target="_blank">LayerLens.ai</a>
+                    </div>
+                    <div class="project-description">
+                        An evaluation platform for LLMs with comprehensive benchmarking and observability tools.
+                    </div>
+                </div>
+                <div class="project">
+                    <div class="project-title">
+                        <a href="https://x.com/goo14_/status/1933344525214495117" target="_blank">microcontract</a>
+                    </div>
+                    <div class="project-description">
+                        Shared infrastructure for agent-to-agent contract negotiation, signing, and execution with cryptographic safety guarantees.
+                    </div>
+                </div>
+                <div class="project">
+                    <div class="project-title">
+                        <a href="https://github.com/garrettallen14/JEPA-Image-World-Model" target="_blank">JEPA-Image-World-Model</a>
+                    </div>
+                    <div class="project-description">
+                        Joint-Embedding Predictive Architecture for learning visual world models from Minecraft gameplay trajectories.
+                    </div>
+                </div>
+                <div class="project">
+                    <div class="project-title">
+                        <a href="https://github.com/garrettallen14/llm-games" target="_blank">LLM-Games</a>
+                    </div>
+                    <div class="project-description">
+                        Interactive game environments designed to evaluate reasoning, planning, and strategic capabilities of language models.
+                    </div>
+                </div>
+                <div class="project">
+                    <div class="project-title">
+                        <a href="https://github.com/garrettallen14/negotiation-env" target="_blank">negotiation-env</a>
+                    </div>
+                    <div class="project-description">
+                        Lightweight simulation environment for training and evaluating autonomous agents in multi-party negotiation scenarios.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #ccc; margin: 2em 0;">
+        
+        <div class="footer-image-container">
+            <img src="footer.jpg" alt="" class="footer-image">
+        </div>
+
+        
+
+        <div class="section">
+            <div class="section-title">Contact</div>
+            <div class="content">
+                <p>
+                    <a href="mailto:garrett.will.allen@gmail.com">garrett.will.allen@gmail.com</a> · 
+                    <a href="https://github.com/garrettallen14" target="_blank">GitHub</a> · 
+                    <a href="https://twitter.com/goo14_" target="_blank">Twitter</a>
+                </p>
+            </div>
+        </div>
+
+        <footer>
+            © 2025 Garrett Allen
+        </footer>
+        
+    </div>
+</body>
+</html>
