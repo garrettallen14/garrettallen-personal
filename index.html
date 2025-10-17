@@ -138,11 +138,60 @@
 
         .footer-image {
             display: block;
-            width: 35%;
+            width: 50%;
             max-width: 100%;
             height: auto;
             margin: 0 auto;
             object-fit: contain;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 2em;
+            align-items: flex-start;
+            margin-top: 2em;
+        }
+
+        .footer-image-section {
+            flex: 0 1 auto;
+            min-width: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .footer-image-section img {
+            width: 100%;
+            max-width: 180px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .footer-contact-section {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .contact-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 0.5em;
+        }
+
+        .contact-links {
+            font-size: 1em;
+        }
+
+        @media (max-width: 600px) {
+            .footer-content {
+                flex-direction: column;
+                gap: 1.5em;
+            }
+            
+            .footer-image-section img {
+                max-width: 140px;
+            }
         }
     </style>
 </head>
@@ -174,21 +223,56 @@
             </div>
         </div>
 
+        <hr style="border: none; border-top: 1px solid #ccc; margin: 2em 0;">
+
+
         <div class="section">
-            <div class="section-title">Favorite Links</div>
+            <div class="section-title">Favorites</div>
             <div class="content">
                 <p>
                     <strong>Papers:</strong> 
-                    <a href="https://arxiv.org/abs/2302.06692" target="_blank">JEPA</a>, 
-                    <a href="https://arxiv.org/abs/2402.10200" target="_blank">CoT Without Prompting</a>, 
-                    <a href="https://arxiv.org/abs/2210.03629" target="_blank">Scaling Instruction-Finetuned LMs</a>
+                    <a href="https://arxiv.org/pdf/2405.07987" target="_blank">Platonic Representation Hypothesis</a>,
+                    <a href="https://openreview.net/pdf?id=BZ5a1r-kVsf" target="_blank">A Path Towards Autonomous Machine Intelligence</a>,
+                    <a href="https://arxiv.org/abs/2403.00504" target="_blank">IWM-JEPA</a>,
+                    <a href="https://medarc-ai.github.io/mindeye2/" target="_blank">MindEye 2</a>,
+                    <a href="https://arxiv.org/abs/2412.16720" target="_blank">o1 System Card</a>,
+                    <a href="https://arxiv.org/abs/2402.03300" target="_blank">DeepSeekMath</a>,
+                    <a href="https://arxiv.org/abs/2411.04368" target="_blank">SimpleQA</a>,
+                    <a href="https://arxiv.org/abs/2305.16291" target="_blank">Voyager</a>,
+                    <a href="https://arxiv.org/pdf/1611.01838" target="_blank">Entropy SGD</a>,
+                    <a href="https://cdn.openai.com/papers/sparse-autoencoders.pdf" target="_blank">Scaling and Evaluating SAEs</a>.
                 </p>
                 <p>
-                    <strong>Resources:</strong> 
-                    <a href="https://github.com/garrettallen14/paper-a-day" target="_blank">My Paper Notes</a>
+                    <strong>Posts:</strong>
+                    <a href="https://leebriskcyrano.com/breach/" target="_blank">Dealing with Daemons through Algorithmic Contracts</a>,
+                    <a href="https://zhengdongwang.com/2024/12/29/2024-letter.html" target="_blank">The Model Does the Eval</a>,
+                    <a href="https://gwern.net/tool-ai" target="_blank">Why Tool AIs Want to Be Agent AIs</a>,
+                    <a href="https://transluce.org/jailbreaking-frontier-models" target="_blank">Jailbreaking Frontier Models (PRBO)</a>,
+                    <a href="https://x.com/ESYudkowsky/status/1850664619603624209" target="_blank">Clever Hans</a>,
+                    <a href="https://www.lesswrong.com/posts/C5guLAx7ieQoowv3d/lecun-s-a-path-towards-autonomous-machine-intelligence-has-1" target="_blank">ATPAMI: Unsolved Technical Alignment Problems</a>.
+                </p>
+                <p>
+                    <strong>Books:</strong>
+                    <a href="https://udlbook.github.io/udlbook/" target="_blank">UDL</a>,
+                    <a href="https://www.amazon.com/Topology-2nd-Economy-James-Munkres/dp/8120320468" target="_blank">Topology</a>,
+                    <a href="https://www.amazon.com/Principles-Mathematical-Analysis-Rudin/dp/1259064786" target="_blank">Baby Rudin</a>,
+                    <a href="https://www.amazon.com/Arbitrage-Theory-Continuous-Oxford-Finance/dp/0198851618" target="_blank">Arbitrage Theory in Continuous Time</a>,
+                    <a href="https://www.amazon.com/Programming-Massively-Parallel-Processors-Hands/dp/0323912311" target="_blank">Programming Massively Parallel Processors</a>,
+                    <a href="https://www.degruyterbrill.com/document/doi/10.1515/9783110783186/html?lang=en&srsltid=AfmBOorWbVyp01Tmv44KL9KFAnkxWs5k4n8THifmaB34CzF6yagCvui_" target="_blank">Neural Networks and Numerical Analysis</a>.
+
+                </p>
+                <p>
+                    <strong>Repositories:</strong> 
+                    <a href="https://github.com/PrismarineJS/mineflayer" target="_blank">Mineflayer</a>,
+                    <a href="https://github.com/facebookresearch/jepa" target="_blank">V-JEPA</a>,
+                    <a href="https://github.com/PrimeIntellect-ai/verifiers" target="_blank">Verifiers</a>,
+                    <a href="https://github.com/sierra-research/tau-bench" target="_blank">TAU-Bench</a>.
                 </p>
             </div>
         </div>
+
+        <hr style="border: none; border-top: 1px solid #ccc; margin: 2em 0;">
+
 
         <div class="section">
             <div class="section-title">Selected Projects</div>
@@ -238,20 +322,18 @@
 
         <hr style="border: none; border-top: 1px solid #ccc; margin: 2em 0;">
         
-        <div class="footer-image-container">
-            <img src="footer.jpg" alt="" class="footer-image">
-        </div>
-
-        
-
-        <div class="section">
-            <div class="section-title">Contact</div>
-            <div class="content">
-                <p>
+        <div class="footer-content">
+            <div class="footer-contact-section">
+                <div class="contact-title">Contact</div>
+                <div class="contact-links">
                     <a href="mailto:garrett.will.allen@gmail.com">garrett.will.allen@gmail.com</a> · 
                     <a href="https://github.com/garrettallen14" target="_blank">GitHub</a> · 
-                    <a href="https://twitter.com/goo14_" target="_blank">Twitter</a>
-                </p>
+                    <a href="https://twitter.com/goo14_" target="_blank">Twitter</a> · 
+                    <a href="https://www.linkedin.com/in/garrett-allen14/" target="_blank">LinkedIn</a>
+                </div>
+            </div>
+            <div class="footer-image-section">
+                <img src="footer.jpg" alt="">
             </div>
         </div>
 
