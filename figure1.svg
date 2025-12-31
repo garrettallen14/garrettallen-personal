@@ -15,9 +15,9 @@
     <rect x="0" y="0" width="170" height="130" rx="8" fill="#f0f9ff" stroke="#3b82f6" stroke-width="2"/>
     <text x="85" y="32" text-anchor="middle" font-size="15" font-weight="bold" fill="#1e40af">CLAIMS</text>
     <line x1="20" y1="48" x2="150" y2="48" stroke="#93c5fd" stroke-width="1"/>
-    <text x="85" y="72" text-anchor="middle" font-size="11" fill="#475569">City Council agenda</text>
-    <text x="85" y="90" text-anchor="middle" font-size="11" fill="#475569">Reddit: parking structure</text>
-    <text x="85" y="108" text-anchor="middle" font-size="11" fill="#475569">Morgan Stanley report</text>
+    <text x="85" y="72" text-anchor="middle" font-size="11" fill="#475569">Reddit: fleet photos</text>
+    <text x="85" y="90" text-anchor="middle" font-size="11" fill="#475569">Job postings</text>
+    <text x="85" y="108" text-anchor="middle" font-size="11" fill="#475569">Insurance filing</text>
   </g>
   
   <!-- Line: Claims → Random Gate -->
@@ -90,7 +90,7 @@
   <g transform="translate(825, 100)">
     <rect x="0" y="0" width="110" height="130" rx="8" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
     <text x="55" y="32" text-anchor="middle" font-size="15" font-weight="bold" fill="#065f46">RCC</text>
-    <text x="55" y="72" text-anchor="middle" font-size="28" font-weight="bold" fill="#059669">+0.124</text>
+    <text x="55" y="72" text-anchor="middle" font-size="28" font-weight="bold" fill="#059669">+0.196</text>
     <text x="55" y="98" text-anchor="middle" font-size="11" fill="#475569">claim helped</text>
     <text x="55" y="116" text-anchor="middle" font-size="11" fill="#475569">prediction</text>
   </g>
@@ -103,16 +103,16 @@
     <text x="450" y="30" text-anchor="middle" font-size="15" font-weight="bold" fill="#1a1a1a">Payout Calculation</text>
     
     <!-- Formula - properly aligned -->
-    <text x="180" y="60" font-size="14" fill="#475569" text-anchor="end">City Council claim:</text>
-    <text x="200" y="60" font-size="15" font-family="'Courier New', Courier, monospace" fill="#1a1a1a">payout = ( RCC / Σ positive RCC ) × bounty</text>
+    <text x="195" y="60" font-size="14" fill="#475569" text-anchor="end">Reddit fleet photos:</text>
+    <text x="215" y="60" font-size="15" font-family="'Courier New', Courier, monospace" fill="#1a1a1a">payout = ( RCC / Σ positive RCC ) × bounty</text>
     
     <!-- Actual numbers - aligned with formula -->
-    <text x="200" y="82" font-size="15" font-family="'Courier New', Courier, monospace" fill="#1a1a1a">
+    <text x="215" y="82" font-size="15" font-family="'Courier New', Courier, monospace" fill="#1a1a1a">
       <tspan fill="#1a1a1a">payout</tspan>
       <tspan fill="#1a1a1a"> = </tspan>
-      <tspan fill="#059669">( 0.124 / 0.75 )</tspan>
+      <tspan fill="#059669">( 0.196 / 1.26 )</tspan>
       <tspan fill="#1a1a1a"> × $10,000 = </tspan>
-      <tspan fill="#059669" font-weight="bold">$1,650</tspan>
+      <tspan fill="#059669" font-weight="bold">$1,556</tspan>
     </text>
   </g>
   

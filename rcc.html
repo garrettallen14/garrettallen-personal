@@ -149,6 +149,22 @@
         em {
             font-style: italic;
         }
+
+        details {
+            margin-top: 2em;
+        }
+
+        summary {
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 0.5em;
+            user-select: none;
+        }
+
+        summary:hover {
+            color: #333;
+        }
     </style>
 </head>
 <body>
@@ -157,11 +173,11 @@
             <a href="index.html">← Back</a>
         </div>
 
-        <h1>Randomized Counterfactual Credit (RCC)</h1>
+        <h1>Randomized Counterfactual Credit (RCC): Measuring Information Value Without Markets</h1>
         <div class="subtitle">A Step Towards Information Infrastructure · 31 December 2025</div>
 
         <p>
-            Prediction markets fail as information infrastructure. For information to get where it's needed, we need ways to pay people for sharing what they know. This post introduces Randomized Counterfactual Credit (RCC), a way to measure how much a piece of information actually helped predict what happened. RCC is a step towards infrastructure that actually pays people to share what they see.
+            Prediction markets fail as information infrastructure. For information to get where it's needed, we need ways to pay people for sharing what they know. This post introduces Randomized Counterfactual Credit (RCC), a way to measure how much a piece of information helped predict what happened. RCC is a step towards infrastructure that pays people to share what they see.
         </p>
 
         <div class="figure">
@@ -293,7 +309,7 @@
         </p>
 
         <p>
-            We ran 25 parallel belief systems, each with a 50% chance of seeing any given claim. We generated 18 example claims, and submitted them in order to simulate real-time information flow. All 18 claims are in the Appendix.
+            We ran 25 parallel belief systems, each with a 50% chance of seeing any given claim. We generated 18 example claims, and submitted them in order to simulate real-time information flow. In this experiment, the 'belief systems' were LLM instances. All 18 claims are in the Appendix.
         </p>
 
         <p>
@@ -328,9 +344,10 @@
 
         <div class="appendix-title">Appendix</div>
 
-        Demo code posted (<a href="https://x.com/no__________end/status/2003642285863354520" target="_blank">here</a>).
+        Demo code posted <a href="https://github.com/garrettallen14/rcc-demo" target="_blank">here</a>.
 
-        <h3>The Claims</h3>
+        <details>
+        <summary>The Claims</summary>
 
         <p>Each claim was submitted in order to simulate real-time information flow.</p>
 
@@ -459,6 +476,7 @@
                 TikTok video from Tesla employee in Austin shows ride in Model 3 with no one in driver seat. Caption: "perks of working here 😏" - video shows destination as "Whole Foods Domain" with fare estimate visible: "$8.40". Posted then deleted within 2 hours. Screenshots circulating.
             </div>
         </div>
+        </details>
 
         <footer>
             Garrett Allen · <a href="index.html">Home</a>
