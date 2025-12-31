@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Randomized Counterfactual Credit (RCC) - Garrett Allen</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.65;
+            color: #000;
+            background-color: #fff;
+            margin: 0;
+            padding: 60px 20px;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            font-weight: normal;
+            margin-bottom: 0.3em;
+        }
+
+        .subtitle {
+            font-size: 1em;
+            color: #666;
+            margin-bottom: 2em;
+        }
+
+        h2 {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-top: 2em;
+            margin-bottom: 0.5em;
+        }
+
+        h3 {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+
+        p {
+            margin-bottom: 1em;
+            text-align: justify;
+        }
+
+        .indent {
+            margin-left: 1.5em;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            background-color: #f5f5f5;
+            padding: 0.8em 1em;
+            margin: 1em 0;
+            border-left: 3px solid #ccc;
+            overflow-x: auto;
+        }
+
+        ul {
+            margin: 0.5em 0 1em 1.5em;
+            padding-left: 0;
+        }
+
+        li {
+            margin-bottom: 0.5em;
+        }
+
+        a {
+            color: #000;
+            text-decoration: none;
+            border-bottom: 1px solid #000;
+        }
+
+        a:hover {
+            border-bottom: 2px solid #000;
+        }
+
+        .back-link {
+            margin-bottom: 2em;
+            font-size: 0.95em;
+        }
+
+        footer {
+            margin-top: 3em;
+            padding-top: 1.5em;
+            border-top: 1px solid #ccc;
+            font-size: 0.9em;
+            color: #666;
+            text-align: center;
+        }
+
+        .figure {
+            margin: 2em 0;
+            text-align: center;
+        }
+
+        .figure img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .figure-caption {
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+            margin-top: 0.5em;
+        }
+
+        .claim {
+            margin-bottom: 1.5em;
+            padding-bottom: 1em;
+            border-bottom: 1px solid #eee;
+        }
+
+        .claim:last-child {
+            border-bottom: none;
+        }
+
+        .claim-header {
+            font-weight: bold;
+            margin-bottom: 0.5em;
+        }
+
+        .claim-body {
+            color: #333;
+        }
+
+        .appendix-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 3em;
+            margin-bottom: 0.5em;
+            padding-top: 1.5em;
+            border-top: 1px solid #ccc;
+        }
+
+        strong {
+            font-weight: bold;
+        }
+
+        em {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="back-link">
+            <a href="index.html">← Back</a>
+        </div>
+
+        <h1>Randomized Counterfactual Credit (RCC)</h1>
+        <div class="subtitle">A Step Towards Information Infrastructure · 31 December 2025</div>
+
+        <p>
+            Prediction markets fail as information infrastructure. For information to get where it's needed, we need ways to pay people for sharing what they know. This post introduces Randomized Counterfactual Credit (RCC), a way to measure how much a piece of information actually helped predict what happened. RCC is a step towards infrastructure that actually pays people to share what they see.
+        </p>
+
+        <div class="figure">
+            <img src="figure1.svg" alt="RCC mechanism diagram showing claims being randomly gated to parallel belief systems">
+        </div>
+
+        <h2>Introduction</h2>
+
+        <p>
+            Prediction markets have proven we can aggregate beliefs into a single, accurate probability. The price <em>is</em> the world's aggregated belief.
+        </p>
+
+        <p>
+            But the price is also the product. And the product is visible to everyone the moment it exists. Prediction markets produce public goods, so they mostly only work for gambling and entertainment.
+        </p>
+
+        <h2>The Problem</h2>
+
+        <p>
+            PnL is a bad way to pay for information.
+        </p>
+
+        <p>
+            You need capital. You need risk tolerance. And even if you have enough conviction to play, you are limited by whether anyone's on the other side of the trade.
+        </p>
+
+        <p>
+            Aggregation is solved, but sourcing is not.
+        </p>
+
+        <p>
+            A nurse notices a spike in respiratory cases. A construction worker notices a new large project. A commuter sees a pothole the city doesn't know about.
+        </p>
+
+        <p>
+            These people have valuable information, but prediction markets ask them to <em>gamble</em>. Even in the rare event there is a liquid market for them to bet in, many won't take the risk. The information never enters the system.
+        </p>
+
+        <p>
+            Information infrastructure should look like: You see something important, and you report it. If this information was useful and mattered, you get paid. No stake, no gambling. Just tell the world what you see.
+        </p>
+
+        <p>
+            The next question is then: "How do you know if something mattered?"
+        </p>
+
+        <p>
+            If we remove trading and prices entirely, we still need a way to know whether information helped. Randomized Counterfactual Credit is our attempt at this.
+        </p>
+
+        <h2>Randomized Counterfactual Credit (RCC)</h2>
+
+        <p>
+            RCC is credit attribution without trading. Sourcers submit claims, and parallel belief systems evaluate them. When the event resolves, we measure which claims improved accuracy at the moment they arrived.
+        </p>
+
+        <p>
+            Liston's <em>Cognitive Finance</em> (<a href="https://x.com/no__________end/status/2003642285863354520" target="_blank">link</a>) proposes a "wall" between information sourcers and market traders. This wall separates the 'seeing' from the 'betting.' We agree with the wall, but for the case study, we get rid of the market entirely, instead showcasing the behavior of a single LLM participant that sets the estimated probability.
+        </p>
+
+        <h3>How It Works</h3>
+
+        <p class="indent">
+            We want to know how important a specific claim was to the accuracy of the market. We can approximate this by asking: what would the world have believed without this claim?
+        </p>
+
+        <p class="indent">
+            In RCC, we run N parallel belief systems. Each one sees the same question and uses the same update logic. When a claim arrives, we flip a coin for each system, so some systems see it and others don't.
+        </p>
+
+        <p class="indent">
+            Beliefs evolve in parallel. For each claim, we then compare: at the moment it arrived, did systems that saw this claim predict better than systems that didn't?
+        </p>
+
+        <h3>The Math</h3>
+
+        <p class="indent">
+            At each step, each replica holds a probability between 0 and 1.
+        </p>
+
+        <p class="indent">
+            When the event resolves, we can score each replica's belief at any point in time using Brier score:
+        </p>
+
+        <div class="formula">
+            Brier(p, outcome) = (p − outcome)²
+        </div>
+
+        <p class="indent">
+            Where p is the replica's probability at that moment, and outcome is 1 (YES) or 0 (NO).
+        </p>
+
+        <p class="indent">
+            For each claim k, we compute:
+        </p>
+
+        <div class="formula">
+            RCC(claim_k) = mean_brier_at_k(didn't see k) − mean_brier_at_k(saw k)
+        </div>
+        
+        <p class="indent">
+            This compares prediction accuracy at the moment claim k arrived, between replicas that saw it and replicas that didn't.
+        </p>
+
+        <p class="indent">
+            Positive RCC means the claim helped. Negative means it hurt. Zero means noise.
+        </p>
+
+        <p class="indent">
+            Payouts are simple: take all positive RCC scores, normalize them, and then divide the bounty across all claims.
+        </p>
+
+        <p class="indent">
+            In our simple case study, negative RCC gets nothing. You don't lose money for being wrong, you just don't get paid.
+        </p>
+
+        <div class="figure">
+            <img src="figure2.svg" alt="RCC scores by claim for Tesla Robotaxi market">
+        </div>
+
+        <h2>Experiment</h2>
+
+        <p>
+            We ran a simulated market scenario: "Will Tesla begin commercial Robotaxi service (paid rides, no safety driver) in any US city by June 30, 2026?"
+        </p>
+
+        <p>
+            This is a multi-billion dollar question. Any real signal could move TSLA's stock considerably. Institutions are looking for ground truth, while regular people (drivers, city employees, Tesla owners) will see things first.
+        </p>
+
+        <p>
+            We ran 25 parallel belief systems, each with a 50% chance of seeing any given claim. We generated 18 example claims, and submitted them in order to simulate real-time information flow. All 18 claims are in the Appendix.
+        </p>
+
+        <p>
+            When a claim comes in, we flip a coin for each belief system replica to decide if it sees the claim. After each claim, every system updates its probability estimate.
+        </p>
+
+        <p>
+            Claims are evaluated relative to what the system already knew. They are not just scored by whether they were right, but whether they helped at the time.
+        </p>
+
+        <p>
+            After submitting all 18 claims to the system, we resolved the market as YES for this experiment.
+        </p>
+
+        <p>
+            Our highest scoring claim was a Reddit post: photos of 12 white Model 3s with no visible driver operating near the Gigafactory. Our lowest scoring claim was the California DMV disengagement data showing Tesla's FSD had 4.2 disengagements per 1,000 miles vs. Waymo's 0.08. This matches the thesis that distributed observers beat institutional sources. Random photos on Reddit provided more predictive value than Morgan Stanley's analysis. Interestingly, the 'Local opposition' claim, which was framed as bearish, actually scored highly because it revealed Tesla was seeking permits for 500 vehicles. RCC measures predictive value, not sentiment. The noisier claims are centered around 0.
+        </p>
+
+        <h2>Conclusion</h2>
+
+        <p>
+            Prediction markets aggregate beliefs from people who are willing to bet. That leaves out most people. We need ways to pay for information that don't require gambling.
+        </p>
+
+        <p>
+            RCC is not a full market. It's intentionally narrow and can assign low credit to information that may have actually been quite valuable to certain parties. Low credit doesn't imply the information was useless, it only implies that it did not improve this forecast at the margin.
+        </p>
+
+        <p>
+            If we want to turn distributed knowledge into something useful, we need to pay people for being right before everyone else catches on. RCC is one way to do that.
+        </p>
+
+        <div class="appendix-title">Appendix</div>
+
+        Demo code posted (<a href="https://x.com/no__________end/status/2003642285863354520" target="_blank">here</a>).
+
+        <h3>The Claims</h3>
+
+        <p>Each claim was submitted in order to simulate real-time information flow.</p>
+
+        <div class="claim">
+            <div class="claim-header">Claim 1 — Baseline context</div>
+            <div class="claim-body">
+                Tesla announced "Robotaxi Day" in October 2024, unveiling the Cybercab concept. Elon Musk stated paid autonomous rides would begin in Texas and California in 2025, though Tesla has missed previous FSD timelines.
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 2 — Public filing (bullish, verifiable)</div>
+            <div class="claim-body">
+                California PUC filing dated December 15, 2025: Tesla Applied for a Drivered Deployment Permit for autonomous vehicle passenger service in San Francisco and Los Angeles. This is the first step before driverless permits.
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 3 — Street sighting (bullish, distributed observer)</div>
+            <div class="claim-body">
+                Photos posted to Reddit r/TeslaMotors from Austin, TX showing fleet of 12 white Model 3s with no visible driver, operating in Gigafactory area. Poster claims they run the same route daily at 6am. [Photos show missing steering wheel through window reflection]
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 4 — Insider signal (bullish, high risk)</div>
+            <div class="claim-body">
+                Blind post from verified Tesla employee: "Friends in the Austin fleet ops team are being told to clear schedules for 'launch readiness' in Q1. They're hiring like crazy for remote vehicle assistance operators."
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 5 — Counter-signal (bearish, credible)</div>
+            <div class="claim-body">
+                California DMV autonomous vehicle disengagement reports for 2025 show Tesla's FSD had 4.2 disengagements per 1,000 miles in mapped areas, vs Waymo's 0.08. Tesla has not applied for driverless testing permits in CA.
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 6 — Financial signal (bearish, institutional)</div>
+            <div class="claim-body">
+                Morgan Stanley auto analyst Adam Jonas downgraded TSLA robotaxi timeline estimates from Q2 2026 to Q4 2027, citing "regulatory conversations suggest Tesla is 18-24 months behind Waymo on permitting."
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 7 — Regulatory signal (bullish, public record)</div>
+            <div class="claim-body">
+                Austin City Council meeting minutes from December 20, 2025 include agenda item: "Autonomous Vehicle Pilot Program Partnership Agreement - Tesla Inc." Discussion scheduled for January 15, 2026 executive session.
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 8 — Physical infrastructure (bullish, distributed observer)</div>
+            <div class="claim-body">
+                Construction worker on Austin subreddit: "We're building a weird parking structure near the Gigafactory. No regular parking spots - just charging stations and what looks like cleaning/inspection bays. Signage says 'Fleet Services' but building permits list Tesla as tenant."
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 9 — Job postings (bullish, OSINT)</div>
+            <div class="claim-body">
+                LinkedIn job postings analysis: Tesla posted 847 "Remote Vehicle Operator" positions in December 2025, all based in Austin. Requirements include "ability to work rotating shifts" and "real-time decision making for autonomous vehicle intervention."
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 10 — Noise / hype</div>
+            <div class="claim-body">
+                Elon Musk tweet from December 28, 2025: "Robotaxi is going to be absolutely insane. Probably ready sooner than people think 🔥" [47K retweets, stock up 3% AH]
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 11 — Insurance signal (bullish, obscure but real)</div>
+            <div class="claim-body">
+                Texas Department of Insurance filing: Tesla Insurance subsidiary registered new policy type "Commercial Autonomous Vehicle Liability - Passenger Service" with $5M per-incident coverage. Effective date January 1, 2026.
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 12 — Competitor intelligence (bearish)</div>
+            <div class="claim-body">
+                Waymo internal memo leaked to The Information: "Tesla regulatory engagement remains minimal. Our government affairs team reports no Tesla presence in ongoing NHTSA rulemaking sessions. They appear to be pursuing a state-by-state strategy that will limit scale."
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 13 — Supply chain (bullish, obscure)</div>
+            <div class="claim-body">
+                Shipping manifest from Port of Houston shows 2,400 "autonomous vehicle sensor cleaning modules" from Chinese supplier Joyson Electronics, consigned to Tesla Gigafactory Texas. Joyson's investor presentation mentions "robotaxi fleet maintenance systems."
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 14 — Local news (bullish, ground truth)</div>
+            <div class="claim-body">
+                Austin American-Statesman reporter: "Source at Austin-Bergstrom Airport confirms Tesla representatives toured the rideshare pickup zone last week with airport operations staff. Discussions included 'dedicated autonomous vehicle staging area.'"
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 15 — App teardown (bullish, technical)</div>
+            <div class="claim-body">
+                Developer on Twitter found hidden code in Tesla app v4.36.0 update: new API endpoints for "hail_ride", "ride_eta", "fare_estimate", and "trip_receipt". Payment integration with Apple Pay and Google Pay. Not yet activated in UI.
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 16 — Local opposition (bearish, friction signal)</div>
+            <div class="claim-body">
+                Austin Rideshare Drivers Association announced protest planned for January 20, 2026 at City Hall. Press release: "We've learned Tesla is seeking permits for 500 autonomous vehicles. This threatens 12,000 driver livelihoods."
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 17 — Satellite imagery (bullish, novel signal type)</div>
+            <div class="claim-body">
+                Planet Labs satellite imagery analysis posted to r/SpaceX shows Tesla Austin lot has 400+ white Model 3/Y vehicles in new "sensor dome" configuration, up from ~50 in November imagery. Vehicles appear uniform, fleet-spec.
+            </div>
+        </div>
+
+        <div class="claim">
+            <div class="claim-header">Claim 18 — Soft launch hint (bullish, high signal)</div>
+            <div class="claim-body">
+                TikTok video from Tesla employee in Austin shows ride in Model 3 with no one in driver seat. Caption: "perks of working here 😏" - video shows destination as "Whole Foods Domain" with fare estimate visible: "$8.40". Posted then deleted within 2 hours. Screenshots circulating.
+            </div>
+        </div>
+
+        <footer>
+            Garrett Allen · <a href="index.html">Home</a>
+        </footer>
+    </div>
+</body>
+</html>
