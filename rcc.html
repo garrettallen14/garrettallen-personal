@@ -150,7 +150,7 @@
         </p>
 
         <p>
-            Think of it like a randomized trial: you run a bunch of forecasters on the same question. They don't talk to each other. When a new claim comes in, you flip a coin. Some forecasters see it, some don't. The ones who don't are your counterfactual. After the event resolves, you check: did the forecasters who saw this claim predict the outcome better than the ones who didn't?
+            Think of it like a randomized trial: you run a bunch of forecasters on the same question. They don't talk to each other. When a new claim comes in, you flip a coin. Some forecasters see it, some don't. You snapshot everyone's belief at that moment. After the event resolves, you score those snapshots: did the forecasters who saw this claim predict better than those who didn't, at the moment it arrived?
         </p>
 
         <p>
@@ -168,6 +168,10 @@
         <div class="formula">
             RCC(claim) = mean_brier(didn't see it) - mean_brier(saw it)
         </div>
+
+        <p>
+            Claims are scored based on when they arrived. A claim that shifts beliefs early gets more credit than the same claim arriving after everyone already knows.
+        </p>
 
         <p>
             Positive means the claim helped. Negative means it hurt. Zero means noise.
