@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About - WhaleSAE</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="nav-brand">WhaleSAE</a>
+    <div class="nav-links">
+      <a href="index.html">Overview</a>
+      <a href="clips.html">Clips</a>
+      <a href="features.html">Features</a>
+      <a href="about.html" class="active">About</a>
+    </div>
+  </nav>
+  <main class="container">
+    <h1>About this explorer</h1>
+
+    <div class="card">
+      <h2>The paper</h2>
+      <p class="card-desc" style="font-size:0.95rem;color:var(--text-primary);line-height:1.6;">
+        <strong>Sparse Autoencoders Reveal Interpretable Cultural Structure in Sperm Whale Communication</strong>
+      </p>
+      <p class="card-desc" style="line-height:1.6;">
+        We present the first application of mechanistic interpretability to animal communication, applying sparse autoencoders (SAEs) to a transformer language model trained on sperm whale coda sequences. Three results: (1) a prediction-identity dissociation -- coda order matters for next-coda prediction but is irrelevant for clan classification; (2) causal validation -- steering SAE features achieves 100% target-clan predictions for 4 of 7 clans; (3) preliminary cross-equipment generalization with CKA = 0.964 on a small independent sample.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>What you can explore here</h2>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;">
+        <div class="prop-item">
+          <span class="prop-label">Audio clips</span>
+          <span class="prop-value">1,501 DSWP recordings with playback</span>
+        </div>
+        <div class="prop-item">
+          <span class="prop-label">SAE features</span>
+          <span class="prop-value">~2,800 alive features from audio SAE</span>
+        </div>
+        <div class="prop-item">
+          <span class="prop-label">CETI catalog</span>
+          <span class="prop-value">Matched clips with researcher annotations</span>
+        </div>
+        <div class="prop-item">
+          <span class="prop-label">Feature 3669</span>
+          <span class="prop-value">Recording-condition sensitive feature</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Data sources</h2>
+      <p class="card-desc" style="line-height:1.6;">
+        Audio clips are from the Dominica Sperm Whale Project (DSWP). The SAE was trained on Google Perch embeddings (d=1280) of these clips using a TopK architecture (d_hidden=5120, k=32). CETI catalog annotations come from DominicaCodas.csv (Andreas et al., 2022). The Pacific coda data comes from the Pacific Coda Dialect Project (Hersh et al., 2022).
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Methods</h2>
+      <p class="card-desc" style="line-height:1.6;">
+        Each audio clip is embedded using Google's Perch bioacoustic model into a 1,280-dimensional vector. A TopK sparse autoencoder decomposes this into 32 active features (out of 5,120 total, ~2,800 alive). Features are characterized by their firing rate, strongest acoustic correlate, and co-activation patterns. The "histogram gives a description; the SAE gives a mechanism" -- you can verify this by comparing clips that share features versus clips with similar acoustic properties.
+      </p>
+    </div>
+  </main>
+</body>
+</html>

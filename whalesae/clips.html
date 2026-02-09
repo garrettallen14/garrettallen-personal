@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Clips - WhaleSAE</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="nav-brand">WhaleSAE</a>
+    <div class="nav-links">
+      <a href="index.html">Overview</a>
+      <a href="clips.html" class="active">Clips</a>
+      <a href="features.html">Features</a>
+      <a href="about.html">About</a>
+    </div>
+  </nav>
+  <main class="container">
+    <h1>Audio clip browser</h1>
+    <p class="subtitle">Browse all 1,501 DSWP sperm whale clips with detected acoustic properties and SAE feature activations.</p>
+
+    <div id="stats-bar" class="stats-bar"></div>
+
+    <div class="controls-row">
+      <div class="control-group">
+        <label>Sort by</label>
+        <select id="sort-select">
+          <option value="wav_num">WAV number</option>
+          <option value="duration">Duration</option>
+          <option value="n_clicks">Click count</option>
+          <option value="n_active_features">Active features</option>
+          <option value="f3669_activation">F3669 activation</option>
+          <option value="mean_ici">Mean ICI</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Order</label>
+        <select id="order-select">
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label><input type="checkbox" id="ceti-check"> CETI matched only</label>
+      </div>
+      <div class="control-group">
+        <label>ICI plausible</label>
+        <select id="ici-select">
+          <option value="all">All</option>
+          <option value="yes">Plausible only</option>
+          <option value="no">Implausible only</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Artifacts</label>
+        <select id="artifact-select">
+          <option value="all">All</option>
+          <option value="no">Exclude suspects</option>
+          <option value="yes">Suspects only</option>
+        </select>
+      </div>
+    </div>
+
+    <p id="result-count" class="feature-count"></p>
+    <div id="clips-list" class="clips-list"></div>
+    <div id="load-more-wrap" style="text-align:center; margin-top:1rem; display:none;">
+      <button id="load-more-btn" class="load-more-btn">Load more</button>
+    </div>
+  </main>
+
+  <script>
+  let allClips = [];
+  let displayCount = 50;
+
+  function fmtDuration(d) { return d ? d.toFixed(2) + 's' : ''; }
+  function fmtICI(ici) {
+    if (!ici) return '';
+    return ici < 0.1 ? (ici * 1000).toFixed(0) + 'ms' : ici.toFixed(3) + 's';
+  }
+
+  function getFiltered() {
+    let clips = [...allClips];
+    if (document.getElementById('ceti-check').checked) clips = clips.filter(c => c.matched_to_ceti);
+    const ici = document.getElementById('ici-select').value;
+    if (ici === 'yes') clips = clips.filter(c => c.ici_plausible);
+    else if (ici === 'no') clips = clips.filter(c => !c.ici_plausible);
+    const art = document.getElementById('artifact-select').value;
+    if (art === 'no') clips = clips.filter(c => !c.suspect_artifact);
+    else if (art === 'yes') clips = clips.filter(c => c.suspect_artifact);
+
+    const sort = document.getElementById('sort-select').value;
+    const desc = document.getElementById('order-select').value === 'desc';
+    clips.sort((a, b) => {
+      const va = a[sort] || 0, vb = b[sort] || 0;
+      return desc ? vb - va : va - vb;
+    });
+    return clips;
+  }
+
+  function renderClip(cm) {
+    const ceti = cm.ceti;
+    let badges = '';
+    if (cm.duration) badges += `<span class="clip-badge">${fmtDuration(cm.duration)}</span>`;
+    if (cm.n_clicks) badges += `<span class="clip-badge">${cm.n_clicks} clicks</span>`;
+    if (cm.mean_ici) badges += `<span class="clip-badge">ICI ${fmtICI(cm.mean_ici)}</span>`;
+    if (cm.n_active_features) badges += `<span class="clip-badge">${cm.n_active_features} features</span>`;
+    if (cm.suspect_artifact) badges += `<span class="clip-badge badge-warn">suspect artifact</span>`;
+    if (!cm.ici_plausible && cm.mean_ici > 0) badges += `<span class="clip-badge badge-warn">fast ICI</span>`;
+    if (ceti) {
+      badges += `<span class="clip-badge badge-ceti">CETI</span>`;
+      if (ceti.coda_type_label) badges += `<span class="clip-badge badge-ceti">${ceti.coda_type_label}</span>`;
+      if (ceti.clan_label) badges += `<span class="clip-badge badge-ceti">${ceti.clan_label}</span>`;
+    }
+
+    return `<div class="clip-row${cm.suspect_artifact ? ' clip-suspect' : ''}">
+      <div class="clip-info">
+        <div class="clip-name-row">
+          <a href="clip.html?id=${cm.clip_idx}" class="clip-name">${cm.wav_name}</a>
+          <span class="clip-act-value">${cm.f3669_activation > 0 ? 'F3669: ' + cm.f3669_activation.toFixed(2) : ''}</span>
+        </div>
+        <div class="clip-badges">${badges}</div>
+      </div>
+      <div class="clip-player">
+        <audio controls preload="none"><source src="audio/${cm.wav_name}" type="audio/wav"></audio>
+      </div>
+    </div>`;
+  }
+
+  function render() {
+    const filtered = getFiltered();
+    const showing = filtered.slice(0, displayCount);
+
+    document.getElementById('result-count').textContent = `Showing ${showing.length} of ${filtered.length} clips`;
+    document.getElementById('clips-list').innerHTML = showing.map(renderClip).join('');
+
+    const wrap = document.getElementById('load-more-wrap');
+    wrap.style.display = displayCount < filtered.length ? '' : 'none';
+  }
+
+  async function load() {
+    const [clipsRes, overviewRes] = await Promise.all([
+      fetch('data/clips.json'),
+      fetch('data/overview.json')
+    ]);
+    allClips = await clipsRes.json();
+    const overview = await overviewRes.json();
+
+    document.getElementById('stats-bar').innerHTML = `
+      <div class="stat-card"><div class="stat-value">${overview.n_clips.toLocaleString()}</div><div class="stat-label">Total clips</div></div>
+      <div class="stat-card"><div class="stat-value">${overview.n_ceti_matched}</div><div class="stat-label">CETI matched</div></div>
+      <div class="stat-card"><div class="stat-value">${overview.n_alive.toLocaleString()}</div><div class="stat-label">Alive features</div></div>
+    `;
+
+    render();
+  }
+
+  document.getElementById('sort-select').addEventListener('change', () => { displayCount = 50; render(); });
+  document.getElementById('order-select').addEventListener('change', () => { displayCount = 50; render(); });
+  document.getElementById('ceti-check').addEventListener('change', () => { displayCount = 50; render(); });
+  document.getElementById('ici-select').addEventListener('change', () => { displayCount = 50; render(); });
+  document.getElementById('artifact-select').addEventListener('change', () => { displayCount = 50; render(); });
+  document.getElementById('load-more-btn').addEventListener('click', () => { displayCount += 50; render(); });
+
+  load();
+  </script>
+</body>
+</html>

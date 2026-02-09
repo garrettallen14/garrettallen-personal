@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhaleSAE - Sparse Autoencoders for Sperm Whale Communication</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="nav-brand">WhaleSAE</a>
+    <div class="nav-links">
+      <a href="index.html" class="active">Overview</a>
+      <a href="clips.html">Clips</a>
+      <a href="features.html">Features</a>
+      <a href="about.html">About</a>
+    </div>
+  </nav>
+  <main class="container">
+    <div class="hero">
+      <h1>WhaleSAE Feature Explorer</h1>
+      <p class="subtitle">Interactive companion to "Sparse Autoencoders Reveal Interpretable Cultural Structure in Sperm Whale Communication." Browse 1,501 audio clips with playable audio and explore what each SAE feature detects.</p>
+      <a href="clips.html" class="paper-link">Browse clips</a>
+      <a href="features.html" class="secondary-link">Explore features</a>
+    </div>
+
+    <div id="stats" class="stats-grid"></div>
+
+    <div class="card">
+      <h2>What is this?</h2>
+      <p class="card-desc">We trained a sparse autoencoder on Perch embeddings of 1,501 sperm whale audio clips from the Dominica Sperm Whale Project. Each clip is decomposed into 32 active features out of ~2,800 alive features. You can listen to any clip, see which features fire on it, and explore what acoustic patterns each feature responds to.</p>
+    </div>
+
+    <div class="card">
+      <h2>Key results</h2>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;">
+        <div class="prop-item"><span class="prop-label">Prediction-identity dissociation</span><span class="prop-value">Order matters for prediction, not identity</span></div>
+        <div class="prop-item"><span class="prop-label">Causal validation</span><span class="prop-value">100% steering for 4/7 clans</span></div>
+        <div class="prop-item"><span class="prop-label">Cross-equipment CKA</span><span class="prop-value">0.964</span></div>
+        <div class="prop-item"><span class="prop-label">Classification accuracy</span><span class="prop-value">96.0% (7-clan, chance=14.3%)</span></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+  async function load() {
+    const res = await fetch('data/overview.json');
+    const data = await res.json();
+    document.getElementById('stats').innerHTML = `
+      <div class="stat-card"><div class="stat-value">${data.n_clips.toLocaleString()}</div><div class="stat-label">Audio clips</div></div>
+      <div class="stat-card"><div class="stat-value">${data.n_alive.toLocaleString()}</div><div class="stat-label">Alive features</div></div>
+      <div class="stat-card"><div class="stat-value">${data.n_ceti_matched}</div><div class="stat-label">CETI matched</div></div>
+      <div class="stat-card"><div class="stat-value">${data.n_novel}</div><div class="stat-label">Novel features</div></div>
+    `;
+  }
+  load();
+  </script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio Features - WhaleSAE</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="nav-brand">WhaleSAE</a>
+    <div class="nav-links">
+      <a href="index.html">Overview</a>
+      <a href="clips.html">Clips</a>
+      <a href="features.html" class="active">Features</a>
+      <a href="about.html">About</a>
+    </div>
+  </nav>
+  <main class="container">
+    <h1>Audio SAE features</h1>
+    <p class="subtitle">All alive features from the audio SAE trained on Perch embeddings of DSWP clips.</p>
+
+    <div id="stats-bar" class="stats-bar"></div>
+
+    <div class="controls-row">
+      <div class="control-group">
+        <label>Sort by</label>
+        <select id="sort-select">
+          <option value="firing_rate">Firing rate</option>
+          <option value="mean_activation">Mean activation</option>
+          <option value="max_activation">Max activation</option>
+          <option value="n_active_clips">Active clips</option>
+          <option value="idx">Feature index</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Order</label>
+        <select id="order-select">
+          <option value="desc">Descending</option>
+          <option value="asc">Ascending</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label><input type="checkbox" id="novel-check"> Novel only</label>
+      </div>
+    </div>
+
+    <p id="result-count" class="feature-count"></p>
+    <div id="features-grid" class="feature-grid"></div>
+    <div id="load-more-wrap" style="text-align:center; margin-top:1rem; display:none;">
+      <button id="load-more-btn" class="load-more-btn">Load more</button>
+    </div>
+  </main>
+
+  <script>
+  let allFeatures = [];
+  let displayCount = 50;
+
+  function getFiltered() {
+    let feats = [...allFeatures];
+    if (document.getElementById('novel-check').checked) feats = feats.filter(f => f.is_novel);
+
+    const sort = document.getElementById('sort-select').value;
+    const desc = document.getElementById('order-select').value === 'desc';
+    feats.sort((a, b) => {
+      const va = a[sort] || 0, vb = b[sort] || 0;
+      return desc ? vb - va : va - vb;
+    });
+    return feats;
+  }
+
+  function renderFeature(f) {
+    const corrLabel = f.strongest_correlation ? f.strongest_correlation.replace(/_/g, ' ') : '';
+    const corrText = corrLabel && f.strongest_corr_value
+      ? `${corrLabel} (r=${f.strongest_corr_value.toFixed(2)})`
+      : '';
+
+    return `<a href="feature.html?id=${f.idx}" class="feature-card${f.is_novel ? ' novel-feature' : ''}">
+      <div class="feature-header">
+        <span class="feature-idx">F${f.idx}</span>
+        ${f.is_novel ? '<span class="novel-badge">novel</span>' : ''}
+      </div>
+      <div class="feature-card-stats">
+        <div class="mini-stat"><span class="mini-value">${(f.firing_rate * 100).toFixed(1)}%</span><span class="mini-label">firing rate</span></div>
+        <div class="mini-stat"><span class="mini-value">${f.n_active_clips}</span><span class="mini-label">clips</span></div>
+        <div class="mini-stat"><span class="mini-value">${f.mean_activation.toFixed(2)}</span><span class="mini-label">mean act</span></div>
+      </div>
+      ${corrText ? `<div class="feature-card-corr">${corrText}</div>` : ''}
+      ${f.rarity ? `<div class="feature-card-hyp">${f.rarity}</div>` : ''}
+    </a>`;
+  }
+
+  function render() {
+    const filtered = getFiltered();
+    const showing = filtered.slice(0, displayCount);
+
+    document.getElementById('result-count').textContent = `Showing ${showing.length} of ${filtered.length} features`;
+    document.getElementById('features-grid').innerHTML = showing.map(renderFeature).join('');
+    document.getElementById('load-more-wrap').style.display = displayCount < filtered.length ? '' : 'none';
+  }
+
+  async function load() {
+    const [featRes, overviewRes] = await Promise.all([
+      fetch('data/features.json'),
+      fetch('data/overview.json')
+    ]);
+    allFeatures = await featRes.json();
+    const overview = await overviewRes.json();
+
+    document.getElementById('stats-bar').innerHTML = `
+      <div class="stat-card"><div class="stat-value">${overview.n_alive.toLocaleString()}</div><div class="stat-label">Alive features</div></div>
+      <div class="stat-card"><div class="stat-value">${overview.n_novel}</div><div class="stat-label">Novel features</div></div>
+      <div class="stat-card"><div class="stat-value">${overview.n_clips.toLocaleString()}</div><div class="stat-label">Clips analyzed</div></div>
+    `;
+
+    render();
+  }
+
+  document.getElementById('sort-select').addEventListener('change', () => { displayCount = 50; render(); });
+  document.getElementById('order-select').addEventListener('change', () => { displayCount = 50; render(); });
+  document.getElementById('novel-check').addEventListener('change', () => { displayCount = 50; render(); });
+  document.getElementById('load-more-btn').addEventListener('click', () => { displayCount += 50; render(); });
+
+  load();
+  </script>
+</body>
+</html>

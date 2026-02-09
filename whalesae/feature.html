@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feature Detail - WhaleSAE</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="nav-brand">WhaleSAE</a>
+    <div class="nav-links">
+      <a href="index.html">Overview</a>
+      <a href="clips.html">Clips</a>
+      <a href="features.html" class="active">Features</a>
+      <a href="about.html">About</a>
+    </div>
+  </nav>
+  <main class="container">
+    <div class="breadcrumb"><a href="features.html">Audio features</a> / <span id="crumb-name">Feature</span></div>
+    <h1 id="feat-title">Loading...</h1>
+
+    <div id="feat-meta" class="stats-bar"></div>
+
+    <div class="card">
+      <h2>Interpretation</h2>
+      <p id="feat-hypothesis" class="card-desc"></p>
+    </div>
+
+    <div class="card">
+      <h2>Activation distribution</h2>
+      <div class="chart-wrap"><canvas id="hist-chart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h2>Session clustering</h2>
+      <p class="card-desc">Which recording sessions this feature fires most frequently in.</p>
+      <div id="session-list" class="clips-list"></div>
+    </div>
+
+    <div class="card">
+      <h2 id="clips-heading">Top activating clips</h2>
+      <p class="card-desc">Audio clips ranked by activation strength for this feature. Listen to hear what it responds to.</p>
+      <div id="clips-list" class="clips-list"></div>
+      <div id="load-more-wrap" style="text-align:center; margin-top:1rem; display:none;">
+        <button id="load-more-btn" class="load-more-btn">Load more</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+  const featIdx = parseInt(new URLSearchParams(window.location.search).get('id'));
+  let allFeatClips = [];
+  let displayCount = 30;
+
+  function renderClips() {
+    const showing = allFeatClips.slice(0, displayCount);
+    const maxAct = allFeatClips.length > 0 ? allFeatClips[0].activation : 1;
+    document.getElementById('clips-heading').textContent = `Top activating clips (${showing.length} of ${allFeatClips.length})`;
+
+    document.getElementById('clips-list').innerHTML = showing.map(c => {
+      const pct = (c.activation / maxAct * 100).toFixed(0);
+      const clipMeta = allClipsMeta[c.clip_idx] || {};
+      const wavName = clipMeta.wav_name || c.clip_idx + '.wav';
+      return `<div class="clip-row">
+        <div class="clip-info">
+          <div class="clip-name-row">
+            <a href="clip.html?id=${c.clip_idx}" class="clip-name">${wavName}</a>
+            <span class="clip-act-value">${c.activation.toFixed(3)}</span>
+          </div>
+          <div class="clip-act-bar"><div class="clip-act-fill" style="width:${pct}%"></div></div>
+        </div>
+        <div class="clip-player">
+          <audio controls preload="none"><source src="audio/${wavName}" type="audio/wav"></audio>
+        </div>
+      </div>`;
+    }).join('');
+
+    document.getElementById('load-more-wrap').style.display = displayCount < allFeatClips.length ? '' : 'none';
+  }
+
+  async function load() {
+    const [featRes, featClipsRes, interpsRes, clipsRes] = await Promise.all([
+      fetch('data/features.json'),
+      fetch('data/feature-clips.json'),
+      fetch('data/feature-interpretations.json'),
+      fetch('data/clips.json')
+    ]);
+    const allFeatures = await featRes.json();
+    const allFeatClipsMap = await featClipsRes.json();
+    const interps = await interpsRes.json();
+    const allClipsMeta = await clipsRes.json();
+
+    const feat = allFeatures.find(f => f.idx === featIdx);
+    if (!feat) {
+      document.getElementById('feat-title').textContent = 'Feature not found';
+      return;
+    }
+
+    const interp = interps[String(featIdx)] || {};
+    allFeatClips = allFeatClipsMap[String(featIdx)] || [];
+
+    // Title
+    document.getElementById('feat-title').textContent = `Feature F${featIdx}`;
+    document.getElementById('crumb-name').textContent = `F${featIdx}`;
+
+    // Meta
+    document.getElementById('feat-meta').innerHTML = `
+      <div class="stat-card"><div class="stat-value">${(feat.firing_rate * 100).toFixed(1)}%</div><div class="stat-label">Firing rate</div></div>
+      <div class="stat-card"><div class="stat-value">${feat.n_active_clips}</div><div class="stat-label">Active clips</div></div>
+      <div class="stat-card"><div class="stat-value">${feat.mean_activation.toFixed(3)}</div><div class="stat-label">Mean activation</div></div>
+      <div class="stat-card"><div class="stat-value">${feat.max_activation.toFixed(3)}</div><div class="stat-label">Max activation</div></div>
+      <div class="stat-card"><div class="stat-value">${interp.rarity || 'unknown'}</div><div class="stat-label">Rarity</div></div>
+      ${feat.is_novel ? '<div class="stat-card"><div class="stat-value" style="color:var(--purple)">Yes</div><div class="stat-label">Novel</div></div>' : ''}
+    `;
+
+    // Hypothesis
+    document.getElementById('feat-hypothesis').textContent = interp.hypothesis || feat.hypothesis || 'No interpretation available.';
+
+    // Histogram
+    if (feat.histogram && feat.histogram.counts.length > 0) {
+      const edges = feat.histogram.edges;
+      const labels = feat.histogram.counts.map((_, i) => ((edges[i] + edges[i + 1]) / 2).toFixed(2));
+      new Chart(document.getElementById('hist-chart'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            data: feat.histogram.counts,
+            backgroundColor: '#3b82f6',
+            borderRadius: 2,
+          }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#94a3b8', maxTicksLimit: 10 }, grid: { color: '#334155' } },
+            y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }
+          }
+        }
+      });
+    }
+
+    // Sessions
+    if (feat.top_sessions && feat.top_sessions.length > 0) {
+      document.getElementById('session-list').innerHTML = feat.top_sessions.map(s =>
+        `<div class="prop-item"><span class="prop-label">WAV ${s.range}</span><span class="prop-value">${s.n_clips} clips</span></div>`
+      ).join('');
+    }
+
+    // Clips
+    renderClips();
+  }
+
+  document.getElementById('load-more-btn').addEventListener('click', () => { displayCount += 30; renderClips(); });
+
+  load();
+  </script>
+</body>
+</html>
