@@ -13,7 +13,8 @@
     <div class="nav-links">
       <a href="index.html">Overview</a>
       <a href="clips.html">Clips</a>
-      <a href="features.html" class="active">Features</a>
+      <a href="features.html" class="active">Audio</a>
+      <a href="whalelm.html">WhaleLM</a>
       <a href="about.html">About</a>
     </div>
   </nav>
@@ -52,6 +53,7 @@
   <script>
   const featIdx = parseInt(new URLSearchParams(window.location.search).get('id'));
   let allFeatClips = [];
+  let allClipsMeta = [];
   let displayCount = 30;
 
   function renderClips() {
@@ -90,7 +92,7 @@
     const allFeatures = await featRes.json();
     const allFeatClipsMap = await featClipsRes.json();
     const interps = await interpsRes.json();
-    const allClipsMeta = await clipsRes.json();
+    allClipsMeta = await clipsRes.json();
 
     const feat = allFeatures.find(f => f.idx === featIdx);
     if (!feat) {

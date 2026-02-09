@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhaleLM Feature Detail - WhaleSAE</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="nav-brand">WhaleSAE</a>
+    <div class="nav-links">
+      <a href="index.html">Overview</a>
+      <a href="clips.html">Clips</a>
+      <a href="features.html">Audio</a>
+      <a href="whalelm.html" class="active">WhaleLM</a>
+      <a href="about.html">About</a>
+    </div>
+  </nav>
+  <main class="container">
+    <div class="breadcrumb"><a href="whalelm.html">WhaleLM features</a> / <span id="crumb-name">Feature</span></div>
+    <h1 id="feat-title">Loading...</h1>
+
+    <div id="feat-meta" class="feature-meta">
+      <div id="meta-grid" class="meta-grid"></div>
+    </div>
+
+    <div class="card">
+      <h2>Activation histogram</h2>
+      <p class="card-desc">Distribution of activation values across all examples where this feature fires.</p>
+      <div class="chart-wrap"><canvas id="hist-chart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h2>Clan firing rates</h2>
+      <p class="card-desc">Fraction of examples in each clan where this feature is active.</p>
+      <div class="chart-wrap"><canvas id="clan-firing-chart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h2>Clan mean activation</h2>
+      <p class="card-desc">Average activation strength per clan (when active).</p>
+      <div class="chart-wrap"><canvas id="clan-act-chart"></canvas></div>
+    </div>
+
+    <div class="card">
+      <h2 id="examples-heading">Top examples</h2>
+      <p class="card-desc">Coda examples with the strongest activation for this feature.</p>
+      <div id="examples-list" class="examples-list"></div>
+    </div>
+  </main>
+
+  <script>
+  const featIdx = parseInt(new URLSearchParams(window.location.search).get('id'));
+
+  function typeColor(type) {
+    if (type === 'universal') return 'var(--green)';
+    if (type === 'clan-specific') return 'var(--purple)';
+    return 'var(--text-muted)';
+  }
+
+  function renderBar(canvasId, data, axisLabels, horizontal) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    new Chart(ctx, {
+      type: 'bar', data,
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        indexAxis: horizontal ? 'y' : 'x',
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { title: axisLabels ? { display: true, text: axisLabels.x, color: '#94a3b8' } : undefined, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+          y: { title: axisLabels ? { display: true, text: axisLabels.y, color: '#94a3b8' } : undefined, grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } }
+        }
+      }
+    });
+  }
+
+  function generateClanColors(n) {
+    const palette = ['#3b82f6','#22c55e','#a855f7','#ef4444','#f59e0b','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1'];
+    return Array.from({length:n},(_,i) => palette[i % palette.length]);
+  }
+
+  async function load() {
+    const res = await fetch('data/whalelm-features.json');
+    const allFeatures = await res.json();
+
+    const feat = allFeatures.find(f => f.idx === featIdx);
+    if (!feat) {
+      document.getElementById('feat-title').textContent = 'Feature not found';
+      return;
+    }
+
+    // Title
+    document.getElementById('feat-title').textContent = `WhaleLM Feature F${featIdx}`;
+    document.getElementById('crumb-name').textContent = `F${featIdx}`;
+    document.title = `F${featIdx} - WhaleLM Feature - WhaleSAE`;
+
+    // Meta grid
+    const color = typeColor(feat.cultural_type);
+    const typeLabel = feat.cultural_type.replace('-', ' ');
+    document.getElementById('meta-grid').innerHTML = `
+      <div class="meta-item">
+        <span class="meta-label">Type</span>
+        <span class="meta-value" style="color:${color}">${typeLabel}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Firing rate</span>
+        <span class="meta-value">${(feat.firing_rate * 100).toFixed(1)}%</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Selectivity</span>
+        <span class="meta-value">${feat.selectivity.toFixed(2)}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Mean activation</span>
+        <span class="meta-value">${feat.mean_activation.toFixed(3)}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Max activation</span>
+        <span class="meta-value">${feat.max_activation.toFixed(3)}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">MI with clan</span>
+        <span class="meta-value" style="color:var(--accent)">${feat.mi_bits.toFixed(3)} bits</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Active examples</span>
+        <span class="meta-value">${feat.n_active}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Clan CV</span>
+        <span class="meta-value">${feat.clan_cv.toFixed(2)}</span>
+      </div>
+    `;
+
+    // Activation histogram
+    if (feat.histogram && feat.histogram.counts.length > 0) {
+      const edges = feat.histogram.edges;
+      const labels = feat.histogram.counts.map((_, i) => ((edges[i] + edges[i + 1]) / 2).toFixed(2));
+      renderBar('hist-chart', {
+        labels,
+        datasets: [{
+          data: feat.histogram.counts,
+          backgroundColor: '#3b82f6',
+          borderRadius: 2,
+        }]
+      }, { x: 'Activation', y: 'Count' });
+    }
+
+    // Clan firing rates chart
+    const clanNames = Object.keys(feat.clan_firing_rates);
+    const clanColors = generateClanColors(clanNames.length);
+    const firingRates = clanNames.map(c => feat.clan_firing_rates[c]);
+
+    renderBar('clan-firing-chart', {
+      labels: clanNames,
+      datasets: [{
+        data: firingRates,
+        backgroundColor: clanColors,
+        borderRadius: 2,
+      }]
+    }, { x: 'Clan', y: 'Firing rate' });
+
+    // Clan mean activation chart
+    const meanActs = clanNames.map(c => feat.clan_mean_activation[c]);
+
+    renderBar('clan-act-chart', {
+      labels: clanNames,
+      datasets: [{
+        data: meanActs,
+        backgroundColor: clanColors,
+        borderRadius: 2,
+      }]
+    }, { x: 'Clan', y: 'Mean activation' });
+
+    // Top examples
+    const examples = feat.top_examples || [];
+    document.getElementById('examples-heading').textContent = `Top examples (${examples.length})`;
+    document.getElementById('examples-list').innerHTML = examples.map(ex =>
+      `<div class="example-row">
+        <span class="example-clan">${ex.clan}</span>
+        <span class="example-act">${ex.activation.toFixed(3)}</span>
+        <span class="example-idx">example ${ex.example_idx}</span>
+      </div>`
+    ).join('');
+  }
+
+  load();
+  </script>
+</body>
+</html>

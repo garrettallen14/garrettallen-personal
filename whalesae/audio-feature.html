@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feature Detail - WhaleSAE</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <a href="audio.html" class="back-link">&larr; Back</a>
+    <h1 id="feat-title">Loading...</h1>
+    <div id="stat-grid" class="stat-grid"></div>
+
+    <div class="section-card">
+      <h2>Interpretation</h2>
+      <p id="feat-hypothesis" style="margin:0;"></p>
+    </div>
+
+    <div class="section-card">
+      <h2>Activation distribution</h2>
+      <div class="chart-wrap"><canvas id="hist-chart"></canvas></div>
+    </div>
+
+    <div class="section-card">
+      <h2>Session clustering</h2>
+      <p class="section-desc">Recording sessions where this feature fires most frequently.</p>
+      <div id="session-list"></div>
+    </div>
+
+    <div class="section-card">
+      <h2 id="clips-heading">Top activating clips</h2>
+      <p class="section-desc">Ranked by activation strength.</p>
+      <div id="clips-list"></div>
+      <div id="load-more-wrap" style="text-align:center; margin-top:0.8em; display:none;">
+        <button id="load-more-btn" class="load-more-btn">Show more</button>
+      </div>
+    </div>
+
+    <footer>WhaleSAE &middot; Sparse Autoencoder Analysis of Sperm Whale Codas</footer>
+  </div>
+
+  <script>
+  var featIdx = parseInt(new URLSearchParams(window.location.search).get('id'));
+  var allFeatClips = [];
+  var allClipsMeta = [];
+  var displayCount = 30;
+  var maxAct = 1;
+
+  function renderClips() {
+    var showing = allFeatClips.slice(0, displayCount);
+    document.getElementById('clips-heading').textContent =
+      'Top activating clips (' + showing.length + ' of ' + allFeatClips.length + ')';
+
+    document.getElementById('clips-list').innerHTML = showing.map(function(c, i) {
+      var meta = allClipsMeta[c.clip_idx] || {};
+      var wav = meta.wav_name || c.clip_idx + '.wav';
+      var barW = (c.activation / maxAct * 100).toFixed(0);
+      return '<div class="clip-row">' +
+        '<span class="clip-rank">#' + (i + 1) + '</span>' +
+        '<div class="clip-info">' +
+          '<span class="clip-name">' + wav + '</span>' +
+          '<div class="clip-meta"><span>' + c.activation.toFixed(3) + '</span></div>' +
+          '<div class="activation-bar"><div class="activation-bar-fill" style="width:' + barW + '%"></div></div>' +
+        '</div>' +
+        '<div class="clip-audio"><audio controls preload="none"><source src="audio/' + wav + '" type="audio/wav"></audio></div>' +
+      '</div>';
+    }).join('');
+
+    document.getElementById('load-more-wrap').style.display =
+      displayCount < allFeatClips.length ? '' : 'none';
+  }
+
+  async function load() {
+    var results = await Promise.all([
+      fetch('data/features.json'),
+      fetch('data/feature-clips.json'),
+      fetch('data/feature-interpretations.json'),
+      fetch('data/clips.json')
+    ]);
+    var allFeatures = await results[0].json();
+    var allFeatClipsMap = await results[1].json();
+    var interps = await results[2].json();
+    allClipsMeta = await results[3].json();
+
+    var feat = allFeatures.find(function(f) { return f.idx === featIdx; });
+    if (!feat) { document.getElementById('feat-title').textContent = 'Feature not found'; return; }
+
+    var interp = interps[String(featIdx)] || {};
+    allFeatClips = allFeatClipsMap[String(featIdx)] || [];
+    if (allFeatClips.length > 0) maxAct = allFeatClips[0].activation;
+
+    document.title = 'Feature F' + featIdx + ' - WhaleSAE';
+    document.getElementById('feat-title').textContent = 'Feature F' + featIdx;
+
+    document.getElementById('stat-grid').innerHTML =
+      '<div class="stat-item"><span class="stat-value">' + (feat.firing_rate * 100).toFixed(1) + '%</span><div class="stat-label">Firing rate</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + feat.n_active_clips + '</span><div class="stat-label">Active clips</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + feat.mean_activation.toFixed(3) + '</span><div class="stat-label">Mean act.</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + feat.max_activation.toFixed(3) + '</span><div class="stat-label">Max act.</div></div>';
+
+    document.getElementById('feat-hypothesis').textContent =
+      interp.hypothesis || feat.hypothesis || 'No interpretation available.';
+
+    if (feat.histogram && feat.histogram.counts.length > 0) {
+      var edges = feat.histogram.edges;
+      var labels = feat.histogram.counts.map(function(_, i) { return ((edges[i] + edges[i+1]) / 2).toFixed(2); });
+      new Chart(document.getElementById('hist-chart'), {
+        type: 'bar',
+        data: { labels: labels, datasets: [{ data: feat.histogram.counts, backgroundColor: '#5b8def', borderRadius: 2 }] },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { title: { display: true, text: 'Activation', color: '#999', font: { size: 11 } }, ticks: { color: '#999', maxTicksLimit: 10 }, grid: { color: '#f0f0f0' } },
+            y: { title: { display: true, text: 'Count', color: '#999', font: { size: 11 } }, ticks: { color: '#999' }, grid: { color: '#f0f0f0' } }
+          }
+        }
+      });
+    }
+
+    if (feat.top_sessions && feat.top_sessions.length > 0) {
+      document.getElementById('session-list').innerHTML = feat.top_sessions.map(function(s) {
+        return '<div class="prop-item"><span class="prop-label">WAV ' + s.range + '</span><span class="prop-value">' + s.n_clips + ' clips</span></div>';
+      }).join('');
+    } else {
+      document.getElementById('session-list').innerHTML = '<p class="muted">No session data.</p>';
+    }
+
+    renderClips();
+  }
+
+  document.getElementById('load-more-btn').addEventListener('click', function() { displayCount += 30; renderClips(); });
+  load();
+  </script>
+</body>
+</html>

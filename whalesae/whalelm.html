@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhaleLM Features - WhaleSAE</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="nav-brand">WhaleSAE</a>
+    <div class="nav-links">
+      <a href="index.html">Overview</a>
+      <a href="clips.html">Clips</a>
+      <a href="features.html">Audio</a>
+      <a href="whalelm.html" class="active">WhaleLM</a>
+      <a href="about.html">About</a>
+    </div>
+  </nav>
+  <main class="container">
+    <h1>WhaleLM SAE features</h1>
+    <p class="subtitle">Sparse autoencoder features from a transformer language model trained on Pacific sperm whale coda sequences across 7 clans.</p>
+
+    <div id="stats-bar" class="stats-bar"></div>
+
+    <div id="clan-grid-wrap" class="card">
+      <h2>Clans</h2>
+      <div id="clan-grid" class="clan-grid"></div>
+    </div>
+
+    <div class="card">
+      <h2>Cultural type distribution</h2>
+      <div id="type-stats" class="stats-bar"></div>
+    </div>
+
+    <div class="controls-row">
+      <div class="control-group">
+        <label>Sort by</label>
+        <select id="sort-select">
+          <option value="firing_rate">Firing rate</option>
+          <option value="mi_bits">Mutual information</option>
+          <option value="selectivity">Selectivity</option>
+          <option value="mean_activation">Mean activation</option>
+          <option value="idx">Feature index</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Cultural type</label>
+        <select id="type-select">
+          <option value="all">All</option>
+          <option value="universal">Universal</option>
+          <option value="clan-specific">Clan-specific</option>
+          <option value="intermediate">Intermediate</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Order</label>
+        <select id="order-select">
+          <option value="desc">Descending</option>
+          <option value="asc">Ascending</option>
+        </select>
+      </div>
+    </div>
+
+    <p id="result-count" class="feature-count"></p>
+    <div id="features-grid" class="feature-grid"></div>
+    <div id="load-more-wrap" style="text-align:center; margin-top:1rem; display:none;">
+      <button id="load-more-btn" class="load-more-btn">Load more</button>
+    </div>
+  </main>
+
+  <script>
+  let allFeatures = [];
+  let displayCount = 50;
+
+  function typeColor(type) {
+    if (type === 'universal') return 'var(--green)';
+    if (type === 'clan-specific') return 'var(--purple)';
+    return 'var(--text-muted)';
+  }
+
+  function getFiltered() {
+    let feats = [...allFeatures];
+    const typeFilter = document.getElementById('type-select').value;
+    if (typeFilter !== 'all') feats = feats.filter(f => f.cultural_type === typeFilter);
+
+    const sort = document.getElementById('sort-select').value;
+    const desc = document.getElementById('order-select').value === 'desc';
+    feats.sort((a, b) => {
+      const va = a[sort] || 0, vb = b[sort] || 0;
+      return desc ? vb - va : va - vb;
+    });
+    return feats;
+  }
+
+  function renderFeature(f) {
+    const borderColor = typeColor(f.cultural_type);
+    const typeLabel = f.cultural_type.replace('-', ' ');
+
+    return `<a href="whalelm-detail.html?id=${f.idx}" class="feature-card" style="border-left-color:${borderColor}">
+      <div class="feature-header">
+        <span class="feature-idx">F${f.idx}</span>
+        <span class="feature-type" style="color:${borderColor}">${typeLabel}</span>
+      </div>
+      <div class="feature-card-stats">
+        <div class="mini-stat"><span class="mini-value">${(f.firing_rate * 100).toFixed(1)}%</span><span class="mini-label">firing rate</span></div>
+        <div class="mini-stat"><span class="mini-value">${f.selectivity.toFixed(1)}</span><span class="mini-label">selectivity</span></div>
+      </div>
+      ${f.mi_bits > 0 ? `<div class="mi-badge">MI: ${f.mi_bits.toFixed(3)} bits</div>` : ''}
+    </a>`;
+  }
+
+  function render() {
+    const filtered = getFiltered();
+    const showing = filtered.slice(0, displayCount);
+
+    document.getElementById('result-count').textContent = `Showing ${showing.length} of ${filtered.length} features`;
+    document.getElementById('features-grid').innerHTML = showing.map(renderFeature).join('');
+    document.getElementById('load-more-wrap').style.display = displayCount < filtered.length ? '' : 'none';
+  }
+
+  async function load() {
+    const [featRes, overviewRes, clansRes] = await Promise.all([
+      fetch('data/whalelm-features.json'),
+      fetch('data/whalelm-overview.json'),
+      fetch('data/whalelm-clans.json')
+    ]);
+    allFeatures = await featRes.json();
+    const overview = await overviewRes.json();
+    const clans = await clansRes.json();
+
+    const acc = (overview.classification.sae_accuracy * 100).toFixed(1);
+    document.getElementById('stats-bar').innerHTML = `
+      <div class="stat-card"><div class="stat-value">${overview.n_examples.toLocaleString()}</div><div class="stat-label">Coda examples</div></div>
+      <div class="stat-card"><div class="stat-value">${overview.n_alive}</div><div class="stat-label">Alive features</div></div>
+      <div class="stat-card"><div class="stat-value">${overview.n_clans}</div><div class="stat-label">Clans</div></div>
+      <div class="stat-card"><div class="stat-value">${acc}%</div><div class="stat-label">Classification accuracy</div></div>
+    `;
+
+    const types = overview.cultural_type_counts;
+    document.getElementById('type-stats').innerHTML = `
+      <div class="stat-card"><div class="stat-value" style="color:var(--green)">${types.universal}</div><div class="stat-label">Universal</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--purple)">${types['clan-specific']}</div><div class="stat-label">Clan-specific</div></div>
+      <div class="stat-card"><div class="stat-value">${types.intermediate}</div><div class="stat-label">Intermediate</div></div>
+    `;
+
+    // Clan grid
+    const clanNames = overview.clan_names;
+    document.getElementById('clan-grid').innerHTML = clanNames.map(name => {
+      const clan = clans[name] || {};
+      return `<a href="clan.html?name=${encodeURIComponent(name)}" class="clan-card">
+        <div style="font-size:1.1rem">${name}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);font-weight:400;margin-top:0.25rem">${clan.n_examples || 0} examples</div>
+      </a>`;
+    }).join('');
+
+    render();
+  }
+
+  document.getElementById('sort-select').addEventListener('change', () => { displayCount = 50; render(); });
+  document.getElementById('type-select').addEventListener('change', () => { displayCount = 50; render(); });
+  document.getElementById('order-select').addEventListener('change', () => { displayCount = 50; render(); });
+  document.getElementById('load-more-btn').addEventListener('click', () => { displayCount += 50; render(); });
+
+  load();
+  </script>
+</body>
+</html>

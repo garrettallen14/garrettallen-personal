@@ -12,7 +12,8 @@
     <div class="nav-links">
       <a href="index.html">Overview</a>
       <a href="clips.html">Clips</a>
-      <a href="features.html">Features</a>
+      <a href="features.html">Audio</a>
+      <a href="whalelm.html">WhaleLM</a>
       <a href="about.html" class="active">About</a>
     </div>
   </nav>
@@ -37,8 +38,12 @@
           <span class="prop-value">1,501 DSWP recordings with playback</span>
         </div>
         <div class="prop-item">
-          <span class="prop-label">SAE features</span>
-          <span class="prop-value">~2,800 alive features from audio SAE</span>
+          <span class="prop-label">Audio SAE features</span>
+          <span class="prop-value">~2,800 alive features from Perch SAE</span>
+        </div>
+        <div class="prop-item">
+          <span class="prop-label">WhaleLM features</span>
+          <span class="prop-value">~370 alive features from Pacific coda SAE</span>
         </div>
         <div class="prop-item">
           <span class="prop-label">CETI catalog</span>
@@ -54,14 +59,17 @@
     <div class="card">
       <h2>Data sources</h2>
       <p class="card-desc" style="line-height:1.6;">
-        Audio clips are from the Dominica Sperm Whale Project (DSWP). The SAE was trained on Google Perch embeddings (d=1280) of these clips using a TopK architecture (d_hidden=5120, k=32). CETI catalog annotations come from DominicaCodas.csv (Andreas et al., 2022). The Pacific coda data comes from the Pacific Coda Dialect Project (Hersh et al., 2022).
+        Audio clips are from the Dominica Sperm Whale Project (DSWP). The audio SAE was trained on Google Perch embeddings (d=1280) of these clips using a TopK architecture (d_hidden=5120, k=32). CETI catalog annotations come from DominicaCodas.csv (Andreas et al., 2022). The Pacific coda data comes from the Pacific Coda Dialect Project (Hersh et al., 2022), with 30,948 codas across 7 clans. The WhaleLM is a SimpleWhaleLM (4 layers, 4 heads, d=128, 824K parameters) trained on Pacific coda sequences, with a TopK SAE (d_hidden=512, k=12) applied to its internal representations.
       </p>
     </div>
 
     <div class="card">
       <h2>Methods</h2>
       <p class="card-desc" style="line-height:1.6;">
-        Each audio clip is embedded using Google's Perch bioacoustic model into a 1,280-dimensional vector. A TopK sparse autoencoder decomposes this into 32 active features (out of 5,120 total, ~2,800 alive). Features are characterized by their firing rate, strongest acoustic correlate, and co-activation patterns. The "histogram gives a description; the SAE gives a mechanism" -- you can verify this by comparing clips that share features versus clips with similar acoustic properties.
+        <strong>Audio SAE:</strong> Each audio clip is embedded using Google's Perch bioacoustic model into a 1,280-dimensional vector. A TopK sparse autoencoder decomposes this into 32 active features (out of 5,120 total, ~2,800 alive). Features are characterized by their firing rate, strongest acoustic correlate, and co-activation patterns.
+      </p>
+      <p class="card-desc" style="line-height:1.6;">
+        <strong>WhaleLM SAE:</strong> A SimpleWhaleLM transformer is trained on Pacific coda sequences to predict the next coda in a sequence. A TopK SAE (d_hidden=512, k=12) is trained on the model's internal activations. Features are classified as universal (fire across all clans), clan-specific (concentrated in one or two clans), or intermediate. Cultural type is determined by mutual information, selectivity, and coefficient of variation across clans.
       </p>
     </div>
   </main>

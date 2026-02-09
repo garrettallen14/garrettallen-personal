@@ -3,55 +3,131 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WhaleSAE - Sparse Autoencoders for Sperm Whale Communication</title>
+  <title>WhaleSAE</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <nav class="top-nav">
-    <a href="index.html" class="nav-brand">WhaleSAE</a>
-    <div class="nav-links">
-      <a href="index.html" class="active">Overview</a>
-      <a href="clips.html">Clips</a>
-      <a href="features.html">Features</a>
-      <a href="about.html">About</a>
-    </div>
-  </nav>
-  <main class="container">
-    <div class="hero">
-      <h1>WhaleSAE Feature Explorer</h1>
-      <p class="subtitle">Interactive companion to "Sparse Autoencoders Reveal Interpretable Cultural Structure in Sperm Whale Communication." Browse 1,501 audio clips with playable audio and explore what each SAE feature detects.</p>
-      <a href="clips.html" class="paper-link">Browse clips</a>
-      <a href="features.html" class="secondary-link">Explore features</a>
-    </div>
+  <div class="container">
+    <a href="https://gallen.dev" class="back-link">&larr; Back</a>
 
-    <div id="stats" class="stats-grid"></div>
+    <h1>WhaleSAE</h1>
+    <p class="subtitle">Interactive feature explorer for &ldquo;Sparse Autoencoders Reveal Interpretable Cultural Structure in Sperm Whale Communication.&rdquo;</p>
 
-    <div class="card">
-      <h2>What is this?</h2>
-      <p class="card-desc">We trained a sparse autoencoder on Perch embeddings of 1,501 sperm whale audio clips from the Dominica Sperm Whale Project. Each clip is decomposed into 32 active features out of ~2,800 alive features. You can listen to any clip, see which features fire on it, and explore what acoustic patterns each feature responds to.</p>
+    <div class="hero-stats" id="hero-stats"></div>
+
+    <div class="section-header">
+      <h2>Audio SAE</h2>
+      <a href="audio.html">Browse all &rarr;</a>
     </div>
+    <p class="section-desc">TopK SAE (k=32) on Google Perch embeddings. Features encode click rhythms, spectral properties, and environmental conditions.</p>
+    <div class="grid-3" id="audio-highlights"></div>
 
-    <div class="card">
-      <h2>Key results</h2>
-      <div style="display:flex;flex-direction:column;gap:0.5rem;">
-        <div class="prop-item"><span class="prop-label">Prediction-identity dissociation</span><span class="prop-value">Order matters for prediction, not identity</span></div>
-        <div class="prop-item"><span class="prop-label">Causal validation</span><span class="prop-value">100% steering for 4/7 clans</span></div>
-        <div class="prop-item"><span class="prop-label">Cross-equipment CKA</span><span class="prop-value">0.964</span></div>
-        <div class="prop-item"><span class="prop-label">Classification accuracy</span><span class="prop-value">96.0% (7-clan, chance=14.3%)</span></div>
+    <div class="section-header">
+      <h2>CodaLM</h2>
+      <a href="codalm.html">Browse all &rarr;</a>
+    </div>
+    <p class="section-desc">TopK SAE (k=12) on transformer hidden states. Features encode cultural structure, predictive relationships, and compositional patterns across 7 vocal clans.</p>
+    <div class="grid-3" id="codalm-highlights"></div>
+
+    <h2 style="margin-top:1.8em;">Key results</h2>
+    <div class="results-grid">
+      <div class="result-card">
+        <strong>96.0% classification</strong>
+        <p>7-clan identification from SAE features alone (chance = 14.3%)</p>
+      </div>
+      <div class="result-card">
+        <strong>Causal validation</strong>
+        <p>Steering with 3 features achieves 100% clan assignment for 4/7 clans</p>
+      </div>
+      <div class="result-card">
+        <strong>CKA = 0.964</strong>
+        <p>Cross-equipment generalization between SAEs on different hydrophones</p>
+      </div>
+      <div class="result-card">
+        <strong>Prediction &ne; identity</strong>
+        <p>Click order matters for next-coda prediction but not clan identity</p>
       </div>
     </div>
-  </main>
+
+    <hr>
+
+    <p class="section-desc">Audio: Dominica Sperm Whale Project (DSWP). Coda sequences: Pacific Sperm Whale Research Consortium, 7 culturally-distinct vocal clans. Sparse autoencoders with TopK activation functions.</p>
+
+    <footer><a href="https://gallen.dev">gallen.dev</a></footer>
+  </div>
 
   <script>
   async function load() {
-    const res = await fetch('data/overview.json');
-    const data = await res.json();
-    document.getElementById('stats').innerHTML = `
-      <div class="stat-card"><div class="stat-value">${data.n_clips.toLocaleString()}</div><div class="stat-label">Audio clips</div></div>
-      <div class="stat-card"><div class="stat-value">${data.n_alive.toLocaleString()}</div><div class="stat-label">Alive features</div></div>
-      <div class="stat-card"><div class="stat-value">${data.n_ceti_matched}</div><div class="stat-label">CETI matched</div></div>
-      <div class="stat-card"><div class="stat-value">${data.n_novel}</div><div class="stat-label">Novel features</div></div>
-    `;
+    var results = await Promise.all([
+      fetch('data/features.json'),
+      fetch('data/feature-interpretations.json'),
+      fetch('data/overview.json'),
+      fetch('data/codalm-features.json'),
+      fetch('data/codalm-overview.json')
+    ]);
+    var audioFeatures = await results[0].json();
+    var interps = await results[1].json();
+    var audioOv = await results[2].json();
+    var codalmFeatures = await results[3].json();
+    var codalmOv = await results[4].json();
+
+    // Hero stats
+    document.getElementById('hero-stats').innerHTML =
+      '<div class="hero-stat"><span class="hero-stat-value">' + audioOv.n_clips.toLocaleString() + '</span><span class="hero-stat-label">Audio clips</span></div>' +
+      '<div class="hero-stat"><span class="hero-stat-value">' + audioOv.n_alive.toLocaleString() + '</span><span class="hero-stat-label">Audio features</span></div>' +
+      '<div class="hero-stat"><span class="hero-stat-value">' + codalmOv.n_clans + '</span><span class="hero-stat-label">Vocal clans</span></div>' +
+      '<div class="hero-stat"><span class="hero-stat-value">' + (codalmOv.classification.sae_accuracy * 100).toFixed(1) + '%</span><span class="hero-stat-label">Clan accuracy</span></div>';
+
+    // Audio highlights: top firing, first novel, F3669
+    var audioSorted = audioFeatures.slice().sort(function(a,b) { return b.firing_rate - a.firing_rate; });
+    var novelAudio = audioFeatures.find(function(f) { return f.is_novel; });
+    var f3669 = audioFeatures.find(function(f) { return f.idx === 3669; });
+    var picks = [audioSorted[0], novelAudio, f3669].filter(Boolean);
+    var seen = {};
+    picks = picks.filter(function(f) { if (seen[f.idx]) return false; seen[f.idx] = true; return true; });
+
+    document.getElementById('audio-highlights').innerHTML = picks.slice(0, 3).map(function(f) {
+      var interp = interps[String(f.idx)] || {};
+      var hyp = interp.hypothesis || f.hypothesis || '';
+      var pct = (f.firing_rate * 100).toFixed(1);
+      var barW = Math.min(100, f.firing_rate * 100 / 25 * 100).toFixed(0);
+      return '<a href="audio-feature.html?id=' + f.idx + '" class="card">' +
+        '<div class="grid-card-name">F' + f.idx + (f.is_novel ? ' <span class="badge badge-novel">novel</span>' : '') + '</div>' +
+        (hyp ? '<div class="grid-card-desc">' + hyp + '</div>' : '') +
+        '<div class="grid-card-meta"><span>' + pct + '% firing</span><span><strong>' + f.n_active_clips + '</strong> clips</span></div>' +
+        '<div class="rate-bar"><div class="rate-bar-fill" style="width:' + barW + '%"></div></div>' +
+      '</a>';
+    }).join('');
+
+    // CodaLM highlights: top firing, first clan-specific, first universal
+    var codalmSorted = codalmFeatures.slice().sort(function(a,b) { return b.firing_rate - a.firing_rate; });
+    var clanSpec = codalmFeatures.find(function(f) { return f.cultural_type === 'clan-specific'; });
+    var univ = codalmFeatures.find(function(f) { return f.cultural_type === 'universal'; });
+    var cpicks = [codalmSorted[0], clanSpec, univ].filter(Boolean);
+    seen = {};
+    cpicks = cpicks.filter(function(f) { if (seen[f.idx]) return false; seen[f.idx] = true; return true; });
+
+    function cBadge(t) {
+      if (t === 'universal') return '<span class="badge badge-universal">universal</span>';
+      if (t === 'clan-specific') return '<span class="badge badge-clan">clan</span>';
+      return '<span class="badge badge-intermediate">intermediate</span>';
+    }
+    function cBorder(t) {
+      if (t === 'universal') return 'type-universal';
+      if (t === 'clan-specific') return 'type-clan-specific';
+      return 'type-intermediate';
+    }
+
+    document.getElementById('codalm-highlights').innerHTML = cpicks.slice(0, 3).map(function(f) {
+      var pct = (f.firing_rate * 100).toFixed(1);
+      var barW = Math.min(100, f.firing_rate * 100 / 40 * 100).toFixed(0);
+      return '<a href="codalm-feature.html?id=' + f.idx + '" class="card ' + cBorder(f.cultural_type) + '">' +
+        '<div class="grid-card-name">F' + f.idx + ' ' + cBadge(f.cultural_type) + '</div>' +
+        '<div class="grid-card-meta"><span>' + pct + '% firing</span><span>MI <strong>' + f.mi_bits.toFixed(3) + '</strong></span><span>Sel <strong>' + f.selectivity.toFixed(1) + '</strong></span></div>' +
+        '<div class="rate-bar"><div class="rate-bar-fill" style="width:' + barW + '%"></div></div>' +
+        '<div class="grid-card-meta" style="margin-top:0.2em"><span>' + f.n_active + ' active</span></div>' +
+      '</a>';
+    }).join('');
   }
   load();
   </script>

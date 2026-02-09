@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodaLM Feature - WhaleSAE</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <a href="codalm.html" class="back-link">&larr; Back</a>
+    <h1 id="feat-title">Loading...</h1>
+    <div id="stat-grid" class="stat-grid"></div>
+
+    <div class="section-card">
+      <h2>Clan firing rates</h2>
+      <div class="chart-wrap"><canvas id="clan-chart"></canvas></div>
+    </div>
+
+    <div class="section-card">
+      <h2>Activation distribution</h2>
+      <div class="chart-wrap"><canvas id="hist-chart"></canvas></div>
+    </div>
+
+    <div class="section-card">
+      <h2 id="examples-heading">Top activating examples</h2>
+      <p class="section-desc">Coda-type sequences from vocal exchanges. Types are color-coded so repeated patterns are visible at a glance.</p>
+      <div id="examples-list"></div>
+      <div id="load-more-wrap" style="text-align:center; margin-top:0.8em; display:none;">
+        <button id="load-more-btn" class="load-more-btn">Show more</button>
+      </div>
+    </div>
+
+    <footer>WhaleSAE &middot; Sparse Autoencoders for Sperm Whale Communication</footer>
+  </div>
+
+  <script>
+  var featIdx = parseInt(new URLSearchParams(window.location.search).get('id'));
+  var allTopExamples = [];
+  var exampleMeta = [];
+  var displayCount = 20;
+
+  var codaColorCache = {};
+  function codaColor(type) {
+    if (codaColorCache[type]) return codaColorCache[type];
+    var h = 0, s = String(type);
+    for (var i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    h = ((h % 360) + 360) % 360;
+    h = (h * 137) % 360;
+    codaColorCache[type] = { bg: 'hsl(' + h + ',38%,90%)', fg: 'hsl(' + h + ',45%,30%)' };
+    return codaColorCache[type];
+  }
+
+  function badgeHtml(type) {
+    var cls = 'badge ';
+    if (type === 'universal') cls += 'badge-universal';
+    else if (type === 'clan-specific') cls += 'badge-clan';
+    else cls += 'badge-intermediate';
+    return '<span class="' + cls + '">' + (type === 'clan-specific' ? 'clan-specific' : type) + '</span>';
+  }
+
+  function renderExamples() {
+    var showing = allTopExamples.slice(0, displayCount);
+    document.getElementById('examples-heading').textContent =
+      'Top activating examples (' + showing.length + ' of ' + allTopExamples.length + ')';
+
+    document.getElementById('examples-list').innerHTML = showing.map(function(ex) {
+      var meta = exampleMeta[ex.example_idx];
+      var clan = ex.clan || (meta ? meta.clan : '?');
+      var codaTypes = meta ? meta.coda_types : [];
+      var tokens = '';
+      for (var i = 0; i < codaTypes.length; i++) {
+        if (codaTypes[i] === 0) continue;
+        var c = codaColor(codaTypes[i]);
+        tokens += '<span class="coda-token" style="background:' + c.bg + ';color:' + c.fg + '">' + codaTypes[i] + '</span>';
+      }
+      return '<div class="example-card">' +
+        '<span class="example-clan">' + clan + '</span>' +
+        '<div class="example-seq"><div class="coda-seq">' + tokens + '</div></div>' +
+        '<span class="example-act">' + ex.activation.toFixed(3) + '</span>' +
+      '</div>';
+    }).join('');
+
+    document.getElementById('load-more-wrap').style.display =
+      displayCount < allTopExamples.length ? '' : 'none';
+  }
+
+  async function load() {
+    var results = await Promise.all([
+      fetch('data/codalm-features.json'),
+      fetch('data/codalm-overview.json'),
+      fetch('data/codalm-examples.json')
+    ]);
+    var allFeatures = await results[0].json();
+    var overview = await results[1].json();
+    exampleMeta = await results[2].json();
+
+    var feat = allFeatures.find(function(f) { return f.idx === featIdx; });
+    if (!feat) { document.getElementById('feat-title').textContent = 'Feature not found'; return; }
+
+    document.title = 'Feature F' + featIdx + ' - WhaleSAE';
+    document.getElementById('feat-title').textContent = 'Feature F' + featIdx;
+
+    document.getElementById('stat-grid').innerHTML =
+      '<div class="stat-item">' + badgeHtml(feat.cultural_type) + '<div class="stat-label">Type</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + (feat.firing_rate * 100).toFixed(1) + '%</span><div class="stat-label">Firing rate</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + feat.n_active + '</span><div class="stat-label">Active</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + feat.mi_bits.toFixed(3) + '</span><div class="stat-label">MI (bits)</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + feat.selectivity.toFixed(2) + '</span><div class="stat-label">Selectivity</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + feat.clan_cv.toFixed(3) + '</span><div class="stat-label">Clan CV</div></div>';
+
+    var clanNames = overview.clan_names;
+    var clanRates = clanNames.map(function(n) { return (feat.clan_firing_rates[n] || 0) * 100; });
+    var clanColors = ['#e57373','#ffb74d','#fff176','#81c784','#4dd0e1','#7986cb','#ba68c8'];
+
+    new Chart(document.getElementById('clan-chart'), {
+      type: 'bar',
+      data: { labels: clanNames, datasets: [{ data: clanRates, backgroundColor: clanColors.slice(0, clanNames.length), borderRadius: 3 }] },
+      options: {
+        indexAxis: 'y',
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { title: { display: true, text: 'Firing rate (%)', color: '#999', font: { size: 11 } }, ticks: { color: '#999' }, grid: { color: '#f0f0f0' } },
+          y: { ticks: { color: '#333', font: { weight: 'bold' } }, grid: { display: false } }
+        }
+      }
+    });
+
+    if (feat.histogram && feat.histogram.counts.length > 0) {
+      var edges = feat.histogram.edges;
+      var labels = feat.histogram.counts.map(function(_, i) { return ((edges[i] + edges[i+1]) / 2).toFixed(2); });
+      new Chart(document.getElementById('hist-chart'), {
+        type: 'bar',
+        data: { labels: labels, datasets: [{ data: feat.histogram.counts, backgroundColor: '#5b8def', borderRadius: 2 }] },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#999', maxTicksLimit: 10 }, grid: { color: '#f0f0f0' } },
+            y: { ticks: { color: '#999' }, grid: { color: '#f0f0f0' } }
+          }
+        }
+      });
+    }
+
+    allTopExamples = feat.top_examples || [];
+    renderExamples();
+  }
+
+  document.getElementById('load-more-btn').addEventListener('click', function() { displayCount += 20; renderExamples(); });
+  load();
+  </script>
+</body>
+</html>
