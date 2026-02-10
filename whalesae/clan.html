@@ -56,7 +56,9 @@
     document.title = 'Clan ' + clanName + ' - WhaleSAE';
     document.getElementById('clan-title').textContent = 'Clan ' + clanName;
     document.getElementById('clan-stats').innerHTML =
-      '<strong>' + clan.n_examples + '</strong> examples &middot; <strong>' + clan.n_active_features + '</strong> active features';
+      '<strong>' + clan.n_examples + '</strong> examples &middot; <strong>' + clan.n_active_features + '</strong> active features' +
+      '<br><span class="muted">This clan produces ' + clan.n_examples + ' of the ' + overview.n_examples.toLocaleString() + ' vocal exchange sequences in the dataset. ' +
+      clan.n_active_features + ' of ' + overview.n_alive + ' SAE features fire on at least one example from this clan.</span>';
 
     var enriched = (clan.top_enriched || []).slice(0, 12);
     document.getElementById('enriched-list').innerHTML =

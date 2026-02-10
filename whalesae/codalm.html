@@ -11,9 +11,11 @@
     <a href="index.html" class="back-link">&larr; Back</a>
     <h1>CodaLM Features</h1>
     <p class="section-desc">TopK SAE (k=12) on SimpleWhaleLM hidden states. Each feature encodes a pattern in how codas are ordered within vocal exchanges.</p>
+    <p class="section-desc">Each card is one feature from a sparse autoencoder trained on CodaLM's hidden states. Features organize into three populations: cultural markers (encode clan identity), predictive detectors (track sequential patterns), and compositional features (respond to individual coda types).</p>
     <p id="stats-line" class="stats"></p>
 
     <h3>Clans</h3>
+    <p class="section-desc" style="margin-top:0;">The seven Pacific vocal clans, each with distinct coda repertoires:</p>
     <div id="clan-list" class="clan-list"></div>
 
     <div class="controls">
@@ -34,6 +36,7 @@
         <option value="asc">Ascending</option>
       </select></label>
     </div>
+    <p class="muted" style="margin-top:0.3em;">MI = mutual information with clan labels (bits) &middot; Sel = selectivity (how concentrated firing is across clans) &middot; Active = number of examples where feature fires</p>
 
     <p id="showing-count" class="showing-count"></p>
     <div id="feature-list" class="grid-3"></div>

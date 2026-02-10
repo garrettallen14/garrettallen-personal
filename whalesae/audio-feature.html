@@ -20,22 +20,24 @@
 
     <div class="section-card">
       <h2>Activation distribution</h2>
+      <p class="section-desc">Distribution of activation strengths when this feature fires. A tight peak means consistent activation; a long tail means some recordings trigger it much more strongly.</p>
       <div class="chart-wrap"><canvas id="hist-chart"></canvas></div>
     </div>
 
     <div class="section-card">
       <h2>Session clustering</h2>
-      <p class="section-desc">Recording sessions where this feature fires most frequently.</p>
+      <p class="section-desc">Recording sessions where this feature fires most frequently. Clusters suggest the feature responds to conditions present in specific recording sessions (e.g., environmental noise, whale proximity, or behavioral state).</p>
       <div id="session-list"></div>
     </div>
 
     <div class="section-card">
       <h2 id="clips-heading">Top activating clips</h2>
-      <p class="section-desc">Ranked by activation strength.</p>
+      <p class="section-desc">Individual recordings ranked by how strongly this feature activates. Higher activation = stronger match to whatever pattern this feature has learned.</p>
       <div id="clips-list"></div>
       <div id="load-more-wrap" style="text-align:center; margin-top:0.8em; display:none;">
         <button id="load-more-btn" class="load-more-btn">Show more</button>
       </div>
+      <p id="end-note" class="muted" style="text-align:center; margin-top:0.6em; display:none;"></p>
     </div>
 
     <footer>WhaleSAE &middot; Sparse Autoencoder Analysis of Sperm Whale Codas</footer>
@@ -47,11 +49,13 @@
   var allClipsMeta = [];
   var displayCount = 30;
   var maxAct = 1;
+  var featureNActiveClips = 0;
 
   function renderClips() {
     var showing = allFeatClips.slice(0, displayCount);
+    var total = featureNActiveClips || allFeatClips.length;
     document.getElementById('clips-heading').textContent =
-      'Top activating clips (' + showing.length + ' of ' + allFeatClips.length + ')';
+      'Top activating clips (showing ' + showing.length + ' of ' + total + ')';
 
     document.getElementById('clips-list').innerHTML = showing.map(function(c, i) {
       var meta = allClipsMeta[c.clip_idx] || {};
@@ -68,8 +72,16 @@
       '</div>';
     }).join('');
 
-    document.getElementById('load-more-wrap').style.display =
-      displayCount < allFeatClips.length ? '' : 'none';
+    var endNote = document.getElementById('end-note');
+    if (displayCount >= allFeatClips.length && allFeatClips.length < total) {
+      document.getElementById('load-more-wrap').style.display = 'none';
+      endNote.textContent = 'Showing top ' + allFeatClips.length + ' by activation strength. ' + total + ' clips activate this feature total.';
+      endNote.style.display = '';
+    } else {
+      endNote.style.display = 'none';
+      document.getElementById('load-more-wrap').style.display =
+        displayCount < allFeatClips.length ? '' : 'none';
+    }
   }
 
   async function load() {
@@ -94,14 +106,19 @@
     document.title = 'Feature F' + featIdx + ' - WhaleSAE';
     document.getElementById('feat-title').textContent = 'Feature F' + featIdx;
 
-    document.getElementById('stat-grid').innerHTML =
-      '<div class="stat-item"><span class="stat-value">' + (feat.firing_rate * 100).toFixed(1) + '%</span><div class="stat-label">Firing rate</div></div>' +
-      '<div class="stat-item"><span class="stat-value">' + feat.n_active_clips + '</span><div class="stat-label">Active clips</div></div>' +
-      '<div class="stat-item"><span class="stat-value">' + feat.mean_activation.toFixed(3) + '</span><div class="stat-label">Mean act.</div></div>' +
-      '<div class="stat-item"><span class="stat-value">' + feat.max_activation.toFixed(3) + '</span><div class="stat-label">Max act.</div></div>';
+    featureNActiveClips = feat.n_active_clips;
 
-    document.getElementById('feat-hypothesis').textContent =
-      interp.hypothesis || feat.hypothesis || 'No interpretation available.';
+    document.getElementById('stat-grid').innerHTML =
+      '<div class="stat-item"><span class="stat-value">' + (feat.firing_rate * 100).toFixed(1) + '%</span><div class="stat-label" title="Percentage of the 1,501 recordings where this feature activates">Firing rate</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + feat.n_active_clips + '</span><div class="stat-label" title="Number of recordings where this feature is active">Active clips</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + feat.mean_activation.toFixed(3) + '</span><div class="stat-label" title="Average activation strength when this feature fires">Mean act.</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + feat.max_activation.toFixed(3) + '</span><div class="stat-label" title="Strongest activation across all recordings">Max act.</div></div>';
+
+    var hypothesis = interp.hypothesis || feat.hypothesis || '';
+    if (!hypothesis) {
+      hypothesis = 'No strong correlations found with measured acoustic properties (click count, ICI, duration, spectral features). This feature may respond to a property not in our analysis set.';
+    }
+    document.getElementById('feat-hypothesis').textContent = hypothesis;
 
     if (feat.histogram && feat.histogram.counts.length > 0) {
       var edges = feat.histogram.edges;

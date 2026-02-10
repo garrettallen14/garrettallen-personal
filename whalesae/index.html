@@ -12,6 +12,7 @@
 
     <h1>WhaleSAE</h1>
     <p class="subtitle">Interactive feature explorer for &ldquo;Sparse Autoencoders Reveal Interpretable Cultural Structure in Sperm Whale Communication.&rdquo;</p>
+    <p class="section-desc">A sparse autoencoder learns to decompose neural network activations into individual features. This explorer lets you browse what those features respond to.</p>
 
     <div class="hero-stats" id="hero-stats"></div>
 
@@ -20,6 +21,7 @@
       <a href="audio.html">Browse all &rarr;</a>
     </div>
     <p class="section-desc">TopK SAE (k=32) on Google Perch embeddings. Features encode click rhythms, spectral properties, and environmental conditions.</p>
+    <p class="section-desc">Each feature represents a pattern the SAE discovered in whale recordings &mdash; some track click rhythms, others capture spectral signatures or recording conditions.</p>
     <div class="grid-3" id="audio-highlights"></div>
 
     <div class="section-header">
@@ -27,6 +29,8 @@
       <a href="codalm.html">Browse all &rarr;</a>
     </div>
     <p class="section-desc">TopK SAE (k=12) on transformer hidden states. Features encode cultural structure, predictive relationships, and compositional patterns across 7 vocal clans.</p>
+    <p class="section-desc">CodaLM is a small transformer trained to predict the next coda in a vocal exchange. The SAE decomposes its internal representations into features that map onto cultural and sequential structure.</p>
+    <p id="codalm-type-counts" class="section-desc"></p>
     <div class="grid-3" id="codalm-highlights"></div>
 
     <h2 style="margin-top:1.8em;">Key results</h2>
@@ -78,11 +82,11 @@
       '<div class="hero-stat"><span class="hero-stat-value">' + codalmOv.n_clans + '</span><span class="hero-stat-label">Vocal clans</span></div>' +
       '<div class="hero-stat"><span class="hero-stat-value">' + (codalmOv.classification.sae_accuracy * 100).toFixed(1) + '%</span><span class="hero-stat-label">Clan accuracy</span></div>';
 
-    // Audio highlights: top firing, first novel, F3669
+    // Audio highlights: top firing, first novel, F2412
     var audioSorted = audioFeatures.slice().sort(function(a,b) { return b.firing_rate - a.firing_rate; });
     var novelAudio = audioFeatures.find(function(f) { return f.is_novel; });
-    var f3669 = audioFeatures.find(function(f) { return f.idx === 3669; });
-    var picks = [audioSorted[0], novelAudio, f3669].filter(Boolean);
+    var f2412 = audioFeatures.find(function(f) { return f.idx === 2412; });
+    var picks = [audioSorted[0], novelAudio, f2412].filter(Boolean);
     var seen = {};
     picks = picks.filter(function(f) { if (seen[f.idx]) return false; seen[f.idx] = true; return true; });
 
@@ -117,6 +121,10 @@
       if (t === 'clan-specific') return 'type-clan-specific';
       return 'type-intermediate';
     }
+
+    var tc = codalmOv.cultural_type_counts;
+    document.getElementById('codalm-type-counts').innerHTML =
+      '<strong>' + tc.universal + '</strong> universal, <strong>' + tc['clan-specific'] + '</strong> clan-specific, <strong>' + tc.intermediate + '</strong> intermediate features';
 
     document.getElementById('codalm-highlights').innerHTML = cpicks.slice(0, 3).map(function(f) {
       var pct = (f.firing_rate * 100).toFixed(1);

@@ -12,24 +12,28 @@
     <a href="codalm.html" class="back-link">&larr; Back</a>
     <h1 id="feat-title">Loading...</h1>
     <div id="stat-grid" class="stat-grid"></div>
+    <p id="auto-interp" class="section-desc" style="margin-top:0.6em;"></p>
 
     <div class="section-card">
       <h2>Clan firing rates</h2>
+      <p class="section-desc">How often this feature activates for examples from each of the seven vocal clans. Uneven bars indicate clan-sensitive features.</p>
       <div class="chart-wrap"><canvas id="clan-chart"></canvas></div>
     </div>
 
     <div class="section-card">
       <h2>Activation distribution</h2>
+      <p class="section-desc">Distribution of activation strengths when this feature fires. A tight peak means consistent activation; a long tail means some examples trigger it much more strongly.</p>
       <div class="chart-wrap"><canvas id="hist-chart"></canvas></div>
     </div>
 
     <div class="section-card">
       <h2 id="examples-heading">Top activating examples</h2>
-      <p class="section-desc">Coda-type sequences from vocal exchanges. Types are color-coded so repeated patterns are visible at a glance.</p>
+      <p class="section-desc">Coda sequences from vocal exchanges, ranked by activation strength. Each colored token is a coda type — repeated colors show the sequential patterns this feature responds to.</p>
       <div id="examples-list"></div>
       <div id="load-more-wrap" style="text-align:center; margin-top:0.8em; display:none;">
         <button id="load-more-btn" class="load-more-btn">Show more</button>
       </div>
+      <p id="end-note" class="muted" style="text-align:center; margin-top:0.6em; display:none;"></p>
     </div>
 
     <footer>WhaleSAE &middot; Sparse Autoencoders for Sperm Whale Communication</footer>
@@ -40,6 +44,7 @@
   var allTopExamples = [];
   var exampleMeta = [];
   var displayCount = 20;
+  var featureNActive = 0;
 
   var codaColorCache = {};
   function codaColor(type) {
@@ -62,8 +67,9 @@
 
   function renderExamples() {
     var showing = allTopExamples.slice(0, displayCount);
+    var total = featureNActive || allTopExamples.length;
     document.getElementById('examples-heading').textContent =
-      'Top activating examples (' + showing.length + ' of ' + allTopExamples.length + ')';
+      'Top activating examples (showing ' + showing.length + ' of ' + total + ')';
 
     document.getElementById('examples-list').innerHTML = showing.map(function(ex) {
       var meta = exampleMeta[ex.example_idx];
@@ -82,8 +88,16 @@
       '</div>';
     }).join('');
 
-    document.getElementById('load-more-wrap').style.display =
-      displayCount < allTopExamples.length ? '' : 'none';
+    var endNote = document.getElementById('end-note');
+    if (displayCount >= allTopExamples.length && allTopExamples.length < total) {
+      document.getElementById('load-more-wrap').style.display = 'none';
+      endNote.textContent = 'Showing top ' + allTopExamples.length + ' by activation strength. ' + total + ' examples activate this feature total.';
+      endNote.style.display = '';
+    } else {
+      endNote.style.display = 'none';
+      document.getElementById('load-more-wrap').style.display =
+        displayCount < allTopExamples.length ? '' : 'none';
+    }
   }
 
   async function load() {
@@ -102,13 +116,25 @@
     document.title = 'Feature F' + featIdx + ' - WhaleSAE';
     document.getElementById('feat-title').textContent = 'Feature F' + featIdx;
 
+    featureNActive = feat.n_active;
+
     document.getElementById('stat-grid').innerHTML =
       '<div class="stat-item">' + badgeHtml(feat.cultural_type) + '<div class="stat-label">Type</div></div>' +
-      '<div class="stat-item"><span class="stat-value">' + (feat.firing_rate * 100).toFixed(1) + '%</span><div class="stat-label">Firing rate</div></div>' +
-      '<div class="stat-item"><span class="stat-value">' + feat.n_active + '</span><div class="stat-label">Active</div></div>' +
-      '<div class="stat-item"><span class="stat-value">' + feat.mi_bits.toFixed(3) + '</span><div class="stat-label">MI (bits)</div></div>' +
-      '<div class="stat-item"><span class="stat-value">' + feat.selectivity.toFixed(2) + '</span><div class="stat-label">Selectivity</div></div>' +
-      '<div class="stat-item"><span class="stat-value">' + feat.clan_cv.toFixed(3) + '</span><div class="stat-label">Clan CV</div></div>';
+      '<div class="stat-item"><span class="stat-value">' + (feat.firing_rate * 100).toFixed(1) + '%</span><div class="stat-label" title="Percentage of the ' + overview.n_examples.toLocaleString() + ' vocal exchange sequences where this feature activates">Firing rate</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + feat.n_active + '</span><div class="stat-label" title="Number of examples where this feature fires">Active</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + feat.mi_bits.toFixed(3) + '</span><div class="stat-label" title="Mutual information with clan labels, in bits. Higher = more informative about clan identity">MI (bits)</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + feat.selectivity.toFixed(2) + '</span><div class="stat-label" title="How concentrated firing is across clans. Higher = more clan-specific">Selectivity</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + feat.clan_cv.toFixed(3) + '</span><div class="stat-label" title="Coefficient of variation of firing rates across clans">Clan CV</div></div>';
+
+    var interpText = '';
+    if (feat.cultural_type === 'universal') {
+      interpText = 'This feature fires broadly across all clans \u2014 it may track a structural or sequential pattern common to all sperm whale vocal exchanges.';
+    } else if (feat.cultural_type === 'clan-specific') {
+      interpText = 'This feature fires primarily in one clan \u2014 it encodes a culturally-specific vocal pattern.';
+    } else {
+      interpText = 'This feature shows moderate clan variation \u2014 it may track a pattern shared by some clans but not others.';
+    }
+    document.getElementById('auto-interp').textContent = interpText;
 
     var clanNames = overview.clan_names;
     var clanRates = clanNames.map(function(n) { return (feat.clan_firing_rates[n] || 0) * 100; });

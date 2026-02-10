@@ -11,6 +11,7 @@
     <a href="index.html" class="back-link">&larr; Back</a>
     <h1>Audio SAE Features</h1>
     <p class="section-desc">TopK SAE (k=32) on Google Perch embeddings of 1,501 sperm whale recordings.</p>
+    <p class="section-desc">Each card is one learned feature from a sparse autoencoder trained on Perch audio embeddings. Firing rate is the percentage of recordings that activate this feature. Features marked "novel" have no strong correlation with any measured acoustic property.</p>
     <p id="stats-line" class="stats"></p>
 
     <div class="controls">
@@ -31,6 +32,7 @@
         <option value="asc">Ascending</option>
       </select></label>
     </div>
+    <p class="muted" style="margin-top:0.3em;">Firing rate = % of clips activating &middot; Clips = number of recordings where this feature is active</p>
 
     <p id="showing-count" class="showing-count"></p>
     <div id="feature-list" class="grid-3"></div>
