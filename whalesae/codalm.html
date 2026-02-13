@@ -117,8 +117,8 @@
 
     document.getElementById('clan-list').innerHTML = ov.clan_names.map(function(name) {
       var c = clans[name] || {};
-      return '<a href="clan.html?name=' + encodeURIComponent(name) + '" class="clan-chip">' +
-        '<strong>' + name + '</strong> <span class="clan-count">' + (c.n_examples || 0) + '</span></a>';
+      return '<span class="clan-chip">' +
+        '<strong>' + name + '</strong> <span class="clan-count">' + (c.n_examples || 0) + '</span></span>';
     }).join('');
     render();
   }

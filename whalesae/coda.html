@@ -324,7 +324,7 @@
       document.getElementById('promoteList').innerHTML = '<p class="empty-msg">No features promote this coda type.</p>';
     } else {
       document.getElementById('promoteList').innerHTML = promoters.map(function(p) {
-        return '<a href="explorer.html#F' + p.idx + '" class="feature-chip">' +
+        return '<a href="index.html#F' + p.idx + '" class="feature-chip">' +
           '<span class="clan-dot" style="background:' + (clanColors[p.dominant_clan] || '#888') + '"></span>' +
           'F' + p.idx +
           '<span class="effect-val effect-positive">+' + p.effect.toFixed(2) + '</span>' +
@@ -337,7 +337,7 @@
       document.getElementById('suppressList').innerHTML = '<p class="empty-msg">No features suppress this coda type.</p>';
     } else {
       document.getElementById('suppressList').innerHTML = suppressors.map(function(s) {
-        return '<a href="explorer.html#F' + s.idx + '" class="feature-chip">' +
+        return '<a href="index.html#F' + s.idx + '" class="feature-chip">' +
           '<span class="clan-dot" style="background:' + (clanColors[s.dominant_clan] || '#888') + '"></span>' +
           'F' + s.idx +
           '<span class="effect-val effect-negative">' + s.effect.toFixed(2) + '</span>' +
