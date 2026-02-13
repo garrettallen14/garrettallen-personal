@@ -8,140 +8,199 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: #111;
+      color: #222;
       background: #fff;
-      line-height: 1.6;
+      line-height: 1.65;
       -webkit-font-smoothing: antialiased;
     }
-    .container {
-      max-width: 640px;
+    .page {
+      max-width: 600px;
       margin: 0 auto;
-      padding: 32px 20px 60px;
+      padding: 40px 20px 80px;
     }
-    a { color: #111; text-decoration: none; border-bottom: 1px solid #ccc; }
-    a:hover { border-bottom-color: #111; }
-    .back { font-size: 0.85em; color: #888; border-bottom-color: #ddd; display: inline-block; margin-bottom: 1.5em; }
-    .back:hover { color: #111; border-bottom-color: #111; }
+    a { color: #222; }
+    a:hover { color: #000; }
+    .back {
+      font-size: 0.82em;
+      color: #999;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 2em;
+    }
+    .back:hover { color: #222; }
     h1 {
       font-family: "Times New Roman", Georgia, serif;
-      font-size: 1.8em;
+      font-size: 1.6em;
       font-weight: normal;
-      margin-bottom: 0.3em;
+      margin-bottom: 0.2em;
     }
-    .subtitle { font-size: 0.92em; color: #666; margin-bottom: 1.5em; }
-    .paper-link {
-      display: inline-block;
-      padding: 0.4em 0.9em;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 0.85em;
+    .lead {
+      font-size: 0.95em;
       color: #555;
       margin-bottom: 2em;
     }
-    .paper-link:hover { border-color: #999; }
-    h2 { font-size: 1em; font-weight: 600; margin: 1.8em 0 0.4em; }
-    h2:first-of-type { margin-top: 0; }
-    p { font-size: 0.9em; color: #444; margin-bottom: 0.8em; }
-    .term { font-weight: 600; color: #111; }
-    .section {
-      background: #fafafa;
-      border: 1px solid #eee;
-      border-radius: 8px;
-      padding: 1em 1.2em;
-      margin-bottom: 0.8em;
+    .links {
+      display: flex;
+      gap: 0.8em;
+      margin-bottom: 2.5em;
+      flex-wrap: wrap;
     }
-    .section h3 {
+    .links a {
+      padding: 0.35em 0.85em;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 0.82em;
+      color: #555;
+      text-decoration: none;
+    }
+    .links a:hover { border-color: #999; color: #222; }
+    h2 {
+      font-size: 0.82em;
+      font-weight: 600;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 2.5em 0 0.8em;
+    }
+    h2:first-of-type { margin-top: 0; }
+    p { font-size: 0.9em; margin-bottom: 0.8em; }
+    .b { font-weight: 600; color: #111; }
+    .mono {
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.85em;
+      background: #f5f5f5;
+      padding: 0.15em 0.4em;
+      border-radius: 3px;
+    }
+    .diagram {
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.8em;
+      line-height: 1.7;
+      background: #f8f9fa;
+      border: 1px solid #eee;
+      padding: 0.9em 1.1em;
+      border-radius: 6px;
+      color: #444;
+      margin: 0.6em 0 1.2em;
+      overflow-x: auto;
+    }
+    dl {
+      margin: 0.3em 0 1em;
+    }
+    dt {
       font-size: 0.88em;
       font-weight: 600;
-      margin-bottom: 0.3em;
+      color: #111;
+      margin-top: 0.8em;
     }
-    .section p { font-size: 0.85em; margin-bottom: 0.5em; }
-    .section p:last-child { margin-bottom: 0; }
-    .kbd {
+    dd {
+      font-size: 0.85em;
+      color: #555;
+      margin: 0.15em 0 0 0;
+    }
+    .keys {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.25em 0.8em;
+      font-size: 0.85em;
+      color: #555;
+    }
+    kbd {
       display: inline-block;
       padding: 1px 6px;
       background: #f3f4f6;
       border: 1px solid #d1d5db;
       border-radius: 3px;
       font-family: inherit;
-      font-size: 0.85em;
+      font-size: 0.9em;
     }
-    .shortcuts {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 0.3em 1em;
-      font-size: 0.85em;
-      color: #444;
+    hr {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 2.5em 0;
     }
     footer {
-      margin-top: 2.5em;
-      padding-top: 1em;
-      border-top: 1px solid #eee;
-      font-size: 0.82em;
+      font-size: 0.8em;
       color: #bbb;
       text-align: center;
     }
+    footer a { color: #bbb; text-decoration: none; }
+    footer a:hover { color: #666; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <a href="index.html" class="back">&larr; Explorer</a>
+<div class="page">
+  <a href="index.html" class="back">&larr; Explorer</a>
 
-    <h1>Guide</h1>
-    <p class="subtitle">How to read the WhaleSAE feature explorer.</p>
+  <h1>WhaleSAE Guide</h1>
+  <p class="lead">How we built this and how to read it.</p>
 
-    <a href="#" class="paper-link">Read the paper</a>
-
-    <h2>What is this?</h2>
-    <p>We trained a small language model (CodaLM) on sperm whale coda sequences, then used a sparse autoencoder (SAE) to break its internal representations into individual features. Each feature responds to a specific pattern in the data. This explorer lets you browse all 191 alive features and see what each one encodes.</p>
-
-    <h2>Layout</h2>
-    <p>The <span class="term">sidebar</span> lists all features, sorted by selectivity by default. Click a feature to see its detail panel on the right. You can search by feature index, clan name, or coda type.</p>
-
-    <h2>Reading a feature</h2>
-
-    <div class="section">
-      <h3>Selectivity</h3>
-      <p>How concentrated a feature's activation is across clans. A selectivity of 1.0 means it fires for only one clan. A selectivity near 0.14 (1/7) means it fires equally across all seven.</p>
-    </div>
-
-    <div class="section">
-      <h3>Clan activation bars</h3>
-      <p>Mean activation strength for each of the 7 Pacific clans. Lopsided bars mean the feature is clan-selective. Flat bars mean it encodes something shared across clans.</p>
-    </div>
-
-    <div class="section">
-      <h3>Top activating windows</h3>
-      <p>The coda sequences where this feature fires strongest. Each colored chip is a coda type. <span class="term">Brighter tokens</span> have higher relevance to this feature. Faded tokens contribute less. Click any token to see which other features respond to that coda type.</p>
-    </div>
-
-    <div class="section">
-      <h3>Logit lens</h3>
-      <p>What this feature does to next-token prediction. "Promotes" means it pushes the model toward predicting these coda types next. "Suppresses" means it pushes away from them. Click any coda type to see all features that affect it.</p>
-    </div>
-
-    <div class="section">
-      <h3>Co-firing</h3>
-      <p>Features that activate on the same windows. High co-firing rate means they encode related or complementary patterns. Click to jump to that feature.</p>
-    </div>
-
-    <div class="section">
-      <h3>Histogram</h3>
-      <p>Distribution of activation strengths when this feature fires. A tight peak means consistent activation. A long tail means some inputs trigger it much more strongly than others.</p>
-    </div>
-
-    <h2>Feature types</h2>
-    <p><span class="term">Clan-specific</span> features fire primarily for one or two clans. These encode culturally specific vocal patterns.</p>
-    <p><span class="term">Universal</span> features fire across all clans. These encode structural or sequential patterns common to all sperm whale vocal exchanges.</p>
-    <p><span class="term">Intermediate</span> features fall between. They may track patterns shared by some clans but not others.</p>
-
-    <h2>Keyboard shortcuts</h2>
-    <div class="shortcuts">
-      <span><span class="kbd">&uarr;</span> <span class="kbd">&darr;</span></span> <span>Browse features</span>
-      <span><span class="kbd">j</span> <span class="kbd">k</span></span> <span>Same (vim-style)</span>
-    </div>
-
-    <footer><a href="index.html">Explorer</a> &middot; <a href="codas.html">Coda types</a></footer>
+  <div class="links">
+    <a href="#">Read the paper</a>
+    <a href="https://github.com/garrettallen14/whalesae-paper">Code repository</a>
+    <a href="index.html">Feature explorer</a>
+    <a href="codas.html">Coda types</a>
   </div>
+
+  <h2>What we did</h2>
+  <p>Sperm whales communicate with codas: short bursts of clicks with specific timing patterns. Whales self-sort into vocal clans based on shared coda dialects. We wanted to understand what a language model learns about these dialects internally.</p>
+  <p>We trained a small transformer (<span class="b">CodaLM</span>) on Pacific coda sequences to predict the next coda in a sequence. Then we applied a <span class="b">sparse autoencoder</span> (SAE) to decompose the model's internal representations into individual, interpretable features.</p>
+  <p>The SAE discovered features that encode clan identity without the model ever seeing clan labels. Injecting a single feature's direction back into the model causally steers its predictions to the target clan.</p>
+
+  <h2>Pipeline</h2>
+  <div class="diagram">Coda sequences (32 per window)
+  &darr;
+CodaLM (4 layers, 4 heads, d=128, ~800K params)
+  &darr;  hidden states (128-dim)
+TopK SAE (k=12, 512 features)
+  &darr;  sparse activations
+191 alive features &rarr; this explorer</div>
+
+  <p>The SAE encoder maps each 128-dimensional hidden state to 512 features, with only 12 active at a time. Of the 512, 191 fire on at least 1% of windows. The rest are dead. This explorer shows only the alive features.</p>
+
+  <h2>Data</h2>
+  <p>23,555 codas from the Pacific Ocean (Hersh et al., 2022), spanning 7 vocal clans recorded at 23 locations between 1978 and 2017. Each coda is represented by its inter-click interval (ICI) vector. We slide 32-coda windows across recording sessions with stride 16, yielding 1,131 windows.</p>
+
+  <h2>How to read the explorer</h2>
+
+  <dl>
+    <dt>Sidebar</dt>
+    <dd>All 191 alive features. Each row shows the feature index, dominant clan (colored dot), type badge, firing rate, and selectivity score. Click to view details. Search by index, clan, or coda type.</dd>
+
+    <dt>Selectivity</dt>
+    <dd>How concentrated a feature's activation is across clans. 1.0 = fires for only one clan. ~0.14 = fires equally across all seven. The big number on each sidebar row.</dd>
+
+    <dt>Clan activation bars</dt>
+    <dd>Mean activation for each clan. Lopsided bars = clan-selective. Flat bars = shared pattern.</dd>
+
+    <dt>Top activating windows</dt>
+    <dd>Coda sequences where this feature fires strongest. Each colored chip is a coda type. Brighter = higher relevance to this feature, faded = less relevant. Click any chip to see that coda type's full page.</dd>
+
+    <dt>Logit lens</dt>
+    <dd>What this feature does to next-coda prediction. "Promotes" = pushes toward predicting these types next. "Suppresses" = pushes away. Click any type to see its detail page.</dd>
+
+    <dt>Co-firing</dt>
+    <dd>Features that activate on the same windows. High percentage = they encode related patterns. Click to jump to that feature.</dd>
+
+    <dt>Histogram</dt>
+    <dd>Distribution of activation strengths when the feature fires. Tight peak = consistent. Long tail = graded response.</dd>
+  </dl>
+
+  <h2>Feature types</h2>
+  <p><span class="b">Clan-specific</span> features fire primarily for one or two clans. These encode cultural vocal patterns.</p>
+  <p><span class="b">Universal</span> features fire across all clans. These encode structural or sequential patterns common to all whales.</p>
+  <p><span class="b">Intermediate</span> features are in between: shared by some clans but not others.</p>
+
+  <h2>Keyboard</h2>
+  <div class="keys">
+    <span><kbd>&uarr;</kbd> <kbd>&darr;</kbd></span> <span>Browse features</span>
+    <span><kbd>j</kbd> <kbd>k</kbd></span> <span>Same (vim-style)</span>
+  </div>
+
+  <hr>
+  <footer>
+    <a href="index.html">Explorer</a> &middot; <a href="codas.html">Coda types</a> &middot; <a href="https://github.com/garrettallen14/whalesae-paper">GitHub</a>
+  </footer>
+</div>
 </body>
 </html>
