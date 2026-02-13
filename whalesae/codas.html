@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coda Types - WhaleSAE</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .coda-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.5em;
+    }
+    .coda-card {
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      padding: 0.8em 1em;
+      cursor: pointer;
+      display: block;
+      color: inherit;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .coda-card:hover {
+      border-color: #bbb;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    a.coda-card, a.coda-card:hover { border-bottom: none; }
+    .coda-card-name {
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+      margin-bottom: 0.3em;
+    }
+    .coda-card-name .coda-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .coda-card-name strong {
+      font-size: 1em;
+    }
+    .coda-card-meta {
+      font-size: 0.78em;
+      color: #888;
+      line-height: 1.4;
+    }
+    .coda-card-meta strong { color: #333; }
+    .coda-card-clans {
+      display: flex;
+      gap: 3px;
+      margin-top: 0.4em;
+    }
+    .coda-card-clans .clan-pip {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .summary-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.2em;
+      font-size: 0.88em;
+      color: #666;
+      margin-bottom: 1em;
+    }
+    .summary-bar strong { color: #111; }
+    .filter-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6em;
+      align-items: center;
+      margin-bottom: 0.8em;
+      font-size: 0.85em;
+    }
+    .filter-controls label { color: #666; }
+    .filter-controls select, .filter-controls input {
+      font-size: 0.9em;
+      padding: 0.25em 0.5em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+    }
+    .filter-controls input[type="text"] {
+      width: 180px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="back-link">&larr; Back</a>
+
+    <h1>Coda types</h1>
+    <p class="subtitle">All coda types found in the Pacific dataset, ranked by how many SAE features respond to them.</p>
+
+    <div class="summary-bar" id="summaryBar"></div>
+
+    <div class="filter-controls">
+      <label>Search <input type="text" id="searchInput" placeholder="Type name..."></label>
+      <label>Sort by <select id="sortSelect">
+        <option value="n_features">Feature count</option>
+        <option value="n_windows">Window count</option>
+        <option value="name">Name</option>
+      </select></label>
+      <label>Clan <select id="clanFilter">
+        <option value="all">All clans</option>
+      </select></label>
+    </div>
+
+    <p id="showingCount" class="showing-count"></p>
+    <div class="coda-grid" id="codaGrid"></div>
+
+    <footer><a href="https://gallen.dev">gallen.dev</a></footer>
+  </div>
+
+  <script>
+  var DATA = null;
+  var codaTypes = [];
+
+  function codaColor(type) {
+    var h = 0, s = String(type);
+    for (var i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    h = ((h % 360) + 360) % 360;
+    return { h: h, bg: 'hsl(' + h + ',55%,88%)', fg: 'hsl(' + h + ',50%,28%)' };
+  }
+
+  function buildCodaTypes() {
+    // Build coda type data from features
+    var typeMap = {};
+    var clanColors = DATA.meta.clan_colors;
+    var clanNames = DATA.meta.clan_names;
+
+    DATA.features.forEach(function(f) {
+      if (!f.alive) return;
+
+      // From logit lens
+      var ll = f.logit_lens || { promoted: [], suppressed: [] };
+      ll.promoted.forEach(function(item) {
+        if (!typeMap[item.type]) typeMap[item.type] = { name: item.type, features_promote: [], features_suppress: [], windows: {}, clan_windows: {} };
+        typeMap[item.type].features_promote.push({ idx: f.idx, effect: item.effect, dominant_clan: f.dominant_clan });
+      });
+      ll.suppressed.forEach(function(item) {
+        if (!typeMap[item.type]) typeMap[item.type] = { name: item.type, features_promote: [], features_suppress: [], windows: {}, clan_windows: {} };
+        typeMap[item.type].features_suppress.push({ idx: f.idx, effect: item.effect, dominant_clan: f.dominant_clan });
+      });
+
+      // From top examples
+      (f.top_examples || []).forEach(function(ex) {
+        (ex.types || []).forEach(function(t) {
+          var ts = String(t);
+          if (!typeMap[ts]) typeMap[ts] = { name: ts, features_promote: [], features_suppress: [], windows: {}, clan_windows: {} };
+          typeMap[ts].windows[ex.window_idx] = true;
+          if (!typeMap[ts].clan_windows[ex.clan]) typeMap[ts].clan_windows[ex.clan] = 0;
+          typeMap[ts].clan_windows[ex.clan]++;
+        });
+      });
+    });
+
+    // Convert to array
+    codaTypes = Object.values(typeMap).map(function(ct) {
+      var nWindows = Object.keys(ct.windows).length;
+      var nFeatures = new Set(
+        ct.features_promote.map(function(f) { return f.idx; }).concat(
+        ct.features_suppress.map(function(f) { return f.idx; }))
+      ).size;
+
+      // Top clans
+      var clanEntries = Object.entries(ct.clan_windows).sort(function(a, b) { return b[1] - a[1]; });
+      var topClans = clanEntries.slice(0, 4).map(function(e) { return e[0]; });
+
+      return {
+        name: ct.name,
+        n_features: nFeatures,
+        n_windows: nWindows,
+        top_clans: topClans,
+        n_promote: ct.features_promote.length,
+        n_suppress: ct.features_suppress.length
+      };
+    });
+
+    // Default sort by feature count
+    codaTypes.sort(function(a, b) { return b.n_features - a.n_features; });
+  }
+
+  function render() {
+    var search = document.getElementById('searchInput').value.toLowerCase().trim();
+    var sortBy = document.getElementById('sortSelect').value;
+    var clanFilter = document.getElementById('clanFilter').value;
+
+    var filtered = codaTypes.slice();
+
+    if (search) {
+      filtered = filtered.filter(function(ct) {
+        return ct.name.toLowerCase().includes(search);
+      });
+    }
+
+    if (clanFilter !== 'all') {
+      filtered = filtered.filter(function(ct) {
+        return ct.top_clans.indexOf(clanFilter) !== -1;
+      });
+    }
+
+    filtered.sort(function(a, b) {
+      if (sortBy === 'n_features') return b.n_features - a.n_features;
+      if (sortBy === 'n_windows') return b.n_windows - a.n_windows;
+      return String(a.name).localeCompare(String(b.name), undefined, { numeric: true });
+    });
+
+    document.getElementById('showingCount').textContent =
+      'Showing ' + filtered.length + ' of ' + codaTypes.length + ' coda types';
+
+    var clanColors = DATA.meta.clan_colors;
+    document.getElementById('codaGrid').innerHTML = filtered.map(function(ct) {
+      var c = codaColor(ct.name);
+      var clanPips = ct.top_clans.map(function(clan) {
+        return '<span class="clan-pip" style="background:' + (clanColors[clan] || '#888') + '" title="' + clan + '"></span>';
+      }).join('');
+
+      return '<a href="coda.html?type=' + encodeURIComponent(ct.name) + '" class="coda-card">' +
+        '<div class="coda-card-name">' +
+          '<span class="coda-swatch" style="background:' + c.bg + ';border:1px solid ' + c.fg + '"></span>' +
+          '<strong>' + ct.name + '</strong>' +
+        '</div>' +
+        '<div class="coda-card-meta">' +
+          '<strong>' + ct.n_features + '</strong> features respond' +
+          (ct.n_windows > 0 ? ' &middot; <strong>' + ct.n_windows + '</strong> windows' : '') +
+        '</div>' +
+        (ct.n_promote > 0 || ct.n_suppress > 0 ?
+          '<div class="coda-card-meta">' + ct.n_promote + ' promote, ' + ct.n_suppress + ' suppress</div>' : '') +
+        (clanPips ? '<div class="coda-card-clans">' + clanPips + '</div>' : '') +
+      '</a>';
+    }).join('');
+  }
+
+  async function init() {
+    var resp = await fetch('data/data.json');
+    DATA = await resp.json();
+
+    // Populate clan filter
+    var clanSel = document.getElementById('clanFilter');
+    DATA.meta.clan_names.forEach(function(c) {
+      var opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = c;
+      clanSel.appendChild(opt);
+    });
+
+    buildCodaTypes();
+
+    document.getElementById('summaryBar').innerHTML =
+      '<span><strong>' + codaTypes.length + '</strong> coda types</span>' +
+      '<span><strong>' + DATA.meta.n_alive + '</strong> alive features</span>' +
+      '<span><strong>' + DATA.meta.n_windows.toLocaleString() + '</strong> windows</span>' +
+      '<span><strong>' + DATA.meta.clan_names.length + '</strong> clans</span>';
+
+    document.getElementById('searchInput').addEventListener('input', render);
+    document.getElementById('sortSelect').addEventListener('change', render);
+    document.getElementById('clanFilter').addEventListener('change', render);
+
+    render();
+  }
+
+  init();
+  </script>
+</body>
+</html>

@@ -14,6 +14,21 @@
     <p class="subtitle">Interactive feature explorer for &ldquo;Sparse Autoencoders Reveal Interpretable Cultural Structure in Sperm Whale Communication.&rdquo;</p>
     <p class="section-desc">A sparse autoencoder learns to decompose neural network activations into individual features. This explorer lets you browse what those features respond to.</p>
 
+    <div style="display:flex;flex-wrap:wrap;gap:0.5em;margin:1.2em 0 0.5em">
+      <a href="explorer.html" class="card" style="padding:0.6em 1em;flex:1;min-width:140px;text-align:center">
+        <div class="grid-card-name" style="font-size:0.9em">Feature explorer</div>
+        <div class="grid-card-desc" style="margin:0">Interactive SAE feature viewer</div>
+      </a>
+      <a href="codas.html" class="card" style="padding:0.6em 1em;flex:1;min-width:140px;text-align:center">
+        <div class="grid-card-name" style="font-size:0.9em">Coda types</div>
+        <div class="grid-card-desc" style="margin:0">Browse all coda type patterns</div>
+      </a>
+      <a href="docs.html" class="card" style="padding:0.6em 1em;flex:1;min-width:140px;text-align:center">
+        <div class="grid-card-name" style="font-size:0.9em">Guide</div>
+        <div class="grid-card-desc" style="margin:0">How to read the explorer</div>
+      </a>
+    </div>
+
     <div class="hero-stats" id="hero-stats"></div>
 
     <div class="section-header">
@@ -26,7 +41,7 @@
 
     <div class="section-header">
       <h2>CodaLM</h2>
-      <a href="codalm.html">Browse all &rarr;</a>
+      <span style="font-size:0.82em"><a href="explorer.html" style="color:#888;margin-right:0.8em">Explorer &rarr;</a><a href="codalm.html" style="color:#888">Grid view &rarr;</a></span>
     </div>
     <p class="section-desc">TopK SAE (k=12) on transformer hidden states. Features encode cultural structure, predictive relationships, and compositional patterns across 7 vocal clans.</p>
     <p class="section-desc">CodaLM is a small transformer trained to predict the next coda in a vocal exchange. The SAE decomposes its internal representations into features that map onto cultural and sequential structure.</p>

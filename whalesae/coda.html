@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coda Type - WhaleSAE</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .coda-hero {
+      display: flex;
+      align-items: center;
+      gap: 0.8em;
+      margin-bottom: 0.3em;
+    }
+    .coda-hero .coda-swatch-lg {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .feature-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      margin: 0 5px 5px 0;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      font-size: 0.82em;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      color: inherit;
+    }
+    a.feature-chip, a.feature-chip:hover { border-bottom: none; }
+    .feature-chip:hover {
+      border-color: #999;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .feature-chip .clan-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .feature-chip .effect-val {
+      font-variant-numeric: tabular-nums;
+      font-size: 0.9em;
+    }
+    .effect-positive { color: #16a34a; }
+    .effect-negative { color: #dc2626; }
+    .clan-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+      font-size: 0.85em;
+    }
+    .clan-bar-label {
+      width: 36px;
+      font-weight: 600;
+      text-align: right;
+      font-size: 0.82em;
+    }
+    .clan-bar-track {
+      flex: 1;
+      height: 16px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .clan-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+    .clan-bar-val {
+      width: 30px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-size: 0.8em;
+      color: #888;
+    }
+    .example-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.82em;
+    }
+    .example-row:last-child { border-bottom: none; }
+    .example-clan {
+      font-weight: 600;
+      min-width: 34px;
+      font-size: 0.82em;
+      padding-top: 2px;
+    }
+    .example-tokens {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+    }
+    .coda-token {
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 0.72em;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .coda-token.highlight {
+      outline: 2px solid rgba(59,130,246,0.6);
+      outline-offset: 1px;
+    }
+    .example-feat {
+      min-width: 40px;
+      text-align: right;
+      font-size: 0.78em;
+      color: #888;
+      padding-top: 2px;
+    }
+    .related-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .related-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border: 1px solid #e5e5e5;
+      border-radius: 4px;
+      font-size: 0.8em;
+      color: inherit;
+      transition: border-color 0.15s;
+    }
+    a.related-chip, a.related-chip:hover { border-bottom: none; }
+    .related-chip:hover { border-color: #999; }
+    .related-chip .related-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+    .related-chip .co-count {
+      font-size: 0.85em;
+      color: #aaa;
+    }
+    .empty-msg {
+      font-size: 0.85em;
+      color: #999;
+      padding: 0.3em 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="codas.html" class="back-link">&larr; All coda types</a>
+
+    <div class="coda-hero" id="codaHero">
+      <div class="coda-swatch-lg" id="codaSwatch"></div>
+      <div>
+        <h1 id="codaTitle" style="margin-bottom:0">Loading...</h1>
+      </div>
+    </div>
+    <p class="subtitle" id="codaSubtitle"></p>
+
+    <div id="statGrid" class="stat-grid"></div>
+
+    <div class="section-card">
+      <h2>Clan distribution</h2>
+      <p class="section-desc">How often this coda type appears in windows from each clan. Based on the top-activating windows across all features.</p>
+      <div id="clanBars"></div>
+    </div>
+
+    <div class="section-card">
+      <h2>Features that promote this type</h2>
+      <p class="section-desc">SAE features whose activation pushes the model toward predicting this coda type next. Sorted by effect strength.</p>
+      <div id="promoteList"></div>
+    </div>
+
+    <div class="section-card">
+      <h2>Features that suppress this type</h2>
+      <p class="section-desc">SAE features whose activation pushes the model away from predicting this coda type. Sorted by effect strength.</p>
+      <div id="suppressList"></div>
+    </div>
+
+    <div class="section-card">
+      <h2 id="examplesHeading">Example windows</h2>
+      <p class="section-desc">Coda sequences containing this type. The target coda is highlighted with a blue outline.</p>
+      <div id="examplesList"></div>
+    </div>
+
+    <div class="section-card">
+      <h2>Related coda types</h2>
+      <p class="section-desc">Types that frequently appear in the same windows as this one. Higher count means stronger co-occurrence.</p>
+      <div id="relatedTypes"></div>
+    </div>
+
+    <footer><a href="https://gallen.dev">gallen.dev</a></footer>
+  </div>
+
+  <script>
+  var codaType = new URLSearchParams(window.location.search).get('type');
+
+  function codaColor(type) {
+    var h = 0, s = String(type);
+    for (var i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    h = ((h % 360) + 360) % 360;
+    return { h: h, bg: 'hsl(' + h + ',55%,88%)', fg: 'hsl(' + h + ',50%,28%)' };
+  }
+
+  async function init() {
+    if (!codaType) {
+      document.getElementById('codaTitle').textContent = 'No coda type specified';
+      return;
+    }
+
+    var resp = await fetch('data/data.json');
+    var DATA = await resp.json();
+    var clanColors = DATA.meta.clan_colors;
+    var clanNames = DATA.meta.clan_names;
+
+    document.title = 'Coda ' + codaType + ' - WhaleSAE';
+
+    var c = codaColor(codaType);
+    document.getElementById('codaSwatch').style.background = c.bg;
+    document.getElementById('codaSwatch').style.border = '2px solid ' + c.fg;
+    document.getElementById('codaTitle').textContent = 'Coda type ' + codaType;
+
+    // Collect data about this coda type
+    var promoters = [];  // features that promote this type
+    var suppressors = [];  // features that suppress this type
+    var examples = [];  // windows containing this type
+    var clanCounts = {};
+    var coOccurrence = {};  // other types that appear alongside this one
+
+    clanNames.forEach(function(cn) { clanCounts[cn] = 0; });
+
+    DATA.features.forEach(function(f) {
+      if (!f.alive) return;
+
+      // Check logit lens
+      var ll = f.logit_lens || { promoted: [], suppressed: [] };
+      ll.promoted.forEach(function(item) {
+        if (String(item.type) === codaType) {
+          promoters.push({ idx: f.idx, effect: item.effect, dominant_clan: f.dominant_clan, type: f.type });
+        }
+      });
+      ll.suppressed.forEach(function(item) {
+        if (String(item.type) === codaType) {
+          suppressors.push({ idx: f.idx, effect: item.effect, dominant_clan: f.dominant_clan, type: f.type });
+        }
+      });
+
+      // Check top examples for windows containing this type
+      (f.top_examples || []).forEach(function(ex) {
+        var types = (ex.types || []).map(String);
+        if (types.indexOf(codaType) !== -1) {
+          examples.push({
+            clan: ex.clan,
+            types: types,
+            feature_idx: f.idx,
+            activation: ex.activation,
+            window_idx: ex.window_idx
+          });
+          clanCounts[ex.clan] = (clanCounts[ex.clan] || 0) + 1;
+
+          // Co-occurrence
+          types.forEach(function(t) {
+            if (t !== codaType) {
+              coOccurrence[t] = (coOccurrence[t] || 0) + 1;
+            }
+          });
+        }
+      });
+    });
+
+    promoters.sort(function(a, b) { return b.effect - a.effect; });
+    suppressors.sort(function(a, b) { return a.effect - b.effect; });
+
+    // Deduplicate examples by window_idx
+    var seenWindows = {};
+    var uniqueExamples = [];
+    examples.forEach(function(ex) {
+      if (!seenWindows[ex.window_idx]) {
+        seenWindows[ex.window_idx] = true;
+        uniqueExamples.push(ex);
+      }
+    });
+    examples = uniqueExamples;
+
+    var nTotalFeatures = new Set(
+      promoters.map(function(p) { return p.idx; }).concat(
+      suppressors.map(function(s) { return s.idx; }))
+    ).size;
+
+    document.getElementById('codaSubtitle').textContent =
+      nTotalFeatures + ' features respond to this coda type across ' + examples.length + ' windows';
+
+    // Stat grid
+    document.getElementById('statGrid').innerHTML =
+      '<div class="stat-item"><span class="stat-value">' + promoters.length + '</span><div class="stat-label">Promote</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + suppressors.length + '</span><div class="stat-label">Suppress</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + examples.length + '</span><div class="stat-label">Windows</div></div>' +
+      '<div class="stat-item"><span class="stat-value">' + Object.keys(coOccurrence).length + '</span><div class="stat-label">Co-occurring types</div></div>';
+
+    // Clan bars
+    var maxClan = Math.max.apply(null, Object.values(clanCounts));
+    if (maxClan === 0) maxClan = 1;
+    document.getElementById('clanBars').innerHTML = clanNames.map(function(cn) {
+      var val = clanCounts[cn] || 0;
+      var pct = (val / maxClan * 100).toFixed(0);
+      return '<div class="clan-bar-row">' +
+        '<span class="clan-bar-label">' + cn + '</span>' +
+        '<div class="clan-bar-track"><div class="clan-bar-fill" style="width:' + pct + '%;background:' + (clanColors[cn] || '#888') + '"></div></div>' +
+        '<span class="clan-bar-val">' + val + '</span>' +
+      '</div>';
+    }).join('');
+
+    // Promoters
+    if (promoters.length === 0) {
+      document.getElementById('promoteList').innerHTML = '<p class="empty-msg">No features promote this coda type.</p>';
+    } else {
+      document.getElementById('promoteList').innerHTML = promoters.map(function(p) {
+        return '<a href="explorer.html#F' + p.idx + '" class="feature-chip">' +
+          '<span class="clan-dot" style="background:' + (clanColors[p.dominant_clan] || '#888') + '"></span>' +
+          'F' + p.idx +
+          '<span class="effect-val effect-positive">+' + p.effect.toFixed(2) + '</span>' +
+        '</a>';
+      }).join('');
+    }
+
+    // Suppressors
+    if (suppressors.length === 0) {
+      document.getElementById('suppressList').innerHTML = '<p class="empty-msg">No features suppress this coda type.</p>';
+    } else {
+      document.getElementById('suppressList').innerHTML = suppressors.map(function(s) {
+        return '<a href="explorer.html#F' + s.idx + '" class="feature-chip">' +
+          '<span class="clan-dot" style="background:' + (clanColors[s.dominant_clan] || '#888') + '"></span>' +
+          'F' + s.idx +
+          '<span class="effect-val effect-negative">' + s.effect.toFixed(2) + '</span>' +
+        '</a>';
+      }).join('');
+    }
+
+    // Examples
+    document.getElementById('examplesHeading').textContent =
+      'Example windows (' + examples.length + ')';
+
+    var showExamples = examples.slice(0, 30);
+    if (examples.length === 0) {
+      document.getElementById('examplesList').innerHTML = '<p class="empty-msg">No example windows found for this coda type.</p>';
+    } else {
+      document.getElementById('examplesList').innerHTML = showExamples.map(function(ex) {
+        var tokens = ex.types.map(function(t) {
+          var tc = codaColor(t);
+          var isTarget = (t === codaType);
+          return '<span class="coda-token' + (isTarget ? ' highlight' : '') + '" style="background:' + tc.bg + ';color:' + tc.fg + '">' + t + '</span>';
+        }).join('');
+        return '<div class="example-row">' +
+          '<span class="example-clan" style="color:' + (clanColors[ex.clan] || '#888') + '">' + ex.clan + '</span>' +
+          '<div class="example-tokens">' + tokens + '</div>' +
+          '<span class="example-feat">F' + ex.feature_idx + '</span>' +
+        '</div>';
+      }).join('');
+
+      if (examples.length > 30) {
+        document.getElementById('examplesList').innerHTML +=
+          '<p style="font-size:0.82em;color:#999;margin-top:0.6em;text-align:center">' +
+          'Showing 30 of ' + examples.length + ' windows</p>';
+      }
+    }
+
+    // Related types
+    var related = Object.entries(coOccurrence)
+      .sort(function(a, b) { return b[1] - a[1]; })
+      .slice(0, 30);
+
+    if (related.length === 0) {
+      document.getElementById('relatedTypes').innerHTML = '<p class="empty-msg">No co-occurring coda types found.</p>';
+    } else {
+      document.getElementById('relatedTypes').innerHTML = '<div class="related-grid">' +
+        related.map(function(pair) {
+          var t = pair[0], count = pair[1];
+          var tc = codaColor(t);
+          return '<a href="coda.html?type=' + encodeURIComponent(t) + '" class="related-chip">' +
+            '<span class="related-swatch" style="background:' + tc.bg + '"></span>' +
+            t +
+            '<span class="co-count">' + count + '</span>' +
+          '</a>';
+        }).join('') +
+      '</div>';
+    }
+  }
+
+  init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guide - WhaleSAE</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .guide-section {
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 1.2em 1.4em;
+      margin-bottom: 1em;
+    }
+    .guide-section h2 {
+      margin-top: 0;
+      margin-bottom: 0.3em;
+      font-size: 1.05em;
+    }
+    .guide-section p {
+      color: #444;
+      line-height: 1.65;
+    }
+    .guide-section p:last-child { margin-bottom: 0; }
+    .term-grid {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 0.4em 1.2em;
+      font-size: 0.9em;
+      line-height: 1.55;
+    }
+    .term-grid dt {
+      font-weight: 600;
+      color: #111;
+      padding-top: 0.15em;
+    }
+    .term-grid dd {
+      color: #555;
+      margin: 0;
+      padding-top: 0.15em;
+    }
+    .shortcut-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88em;
+    }
+    .shortcut-table td {
+      padding: 0.4em 0.6em;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .shortcut-table td:first-child {
+      width: 120px;
+      font-weight: 600;
+    }
+    .shortcut-table td:first-child kbd {
+      display: inline-block;
+      padding: 2px 6px;
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.9em;
+    }
+    .visual-example {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 6px;
+      padding: 1em;
+      margin: 0.8em 0;
+    }
+    .visual-example .coda-token {
+      display: inline-block;
+      font-size: 0.72em;
+      font-weight: 500;
+      padding: 0.15em 0.4em;
+      border-radius: 3px;
+      line-height: 1.3;
+    }
+    .diagram {
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.78em;
+      line-height: 1.6;
+      background: #f8f9fa;
+      padding: 0.8em 1em;
+      border-radius: 4px;
+      overflow-x: auto;
+      color: #444;
+    }
+    .nav-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5em;
+      margin-bottom: 1.5em;
+    }
+    .nav-row a {
+      padding: 0.35em 0.8em;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 0.85em;
+      color: #555;
+      border-bottom: 1px solid #ddd;
+    }
+    .nav-row a:hover { border-color: #999; color: #111; }
+    @media (max-width: 600px) {
+      .term-grid { grid-template-columns: 1fr; }
+      .term-grid dt { padding-bottom: 0; }
+      .term-grid dd { padding-bottom: 0.6em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="back-link">&larr; Back</a>
+
+    <h1>Guide</h1>
+    <p class="subtitle">How to read the WhaleSAE feature explorer.</p>
+
+    <div class="nav-row">
+      <a href="explorer.html">Open explorer</a>
+      <a href="codas.html">Browse coda types</a>
+      <a href="codalm.html">Feature grid</a>
+      <a href="about.html">About the paper</a>
+    </div>
+
+    <div class="guide-section">
+      <h2>What is this?</h2>
+      <p>WhaleSAE is an interactive explorer for sparse autoencoder (SAE) features trained on a small language model that predicts sperm whale coda sequences.</p>
+      <p>The language model (CodaLM) is a 4-layer, 128-dimensional transformer trained on 30,948 codas from 7 culturally-distinct Pacific sperm whale clans. It learns to predict the next coda in a vocal exchange. The SAE then decomposes the model's internal representations into 512 individual features, each encoding a specific pattern.</p>
+      <p>The result: without any supervision, the SAE discovers features that map directly onto cultural structure. Some features fire only for one clan's coda sequences. Others track sequential patterns shared across all clans.</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>What is a sparse autoencoder?</h2>
+      <p>A sparse autoencoder (SAE) is a neural network that learns to decompose dense, entangled representations into sparse, interpretable features. For each input, only a small number of features activate (here, 12 out of 512). Each feature has a "decoder direction" in the model's representation space, which defines what pattern it encodes.</p>
+      <p>Think of it like a prism splitting white light into individual colors. The model's internal states are the white light (dense, entangled). The SAE splits them into individual features (colors) that each have a specific, interpretable meaning.</p>
+      <div class="diagram">
+Input window (32 codas) &rarr; CodaLM hidden states (128-dim)
+    &rarr; SAE encoder &rarr; 512 features (12 active)
+    &rarr; SAE decoder &rarr; reconstructed hidden states
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <h2>The explorer layout</h2>
+      <p>The <a href="explorer.html">feature explorer</a> has two panels:</p>
+      <p><strong>Sidebar (left):</strong> A scrollable list of all 191 alive features. Each row shows the feature index, a colored dot for its dominant clan, its type (clan-specific, universal, or intermediate), and its selectivity score. Use the search box to find features by index, clan, or coda type. Sort by selectivity, firing rate, or index. Filter by clan or type.</p>
+      <p><strong>Detail panel (right):</strong> When you select a feature, the detail panel shows everything about it: an auto-generated interpretation, stats, clan activation bars, top activating windows with per-position highlighting, logit lens, co-firing features, and an activation histogram.</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>Clan activation bars</h2>
+      <p>Seven horizontal bars showing how strongly this feature fires for coda sequences from each clan. A clan-specific feature shows one tall bar and six flat ones. A universal feature shows roughly equal bars across all clans.</p>
+      <p>The seven Pacific clans are: FP, PALI, PO, REG, RI, SH, and SI. Each has a distinct repertoire of coda patterns used in vocal exchanges.</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>Top activating windows</h2>
+      <p>The 20 coda sequences (windows of 32 codas) that activate this feature most strongly. Each colored token is a coda type. The same coda type always gets the same color across the entire site.</p>
+      <p><strong>Brightness = relevance.</strong> Vivid tokens contribute most to this feature's activation. Faded tokens contribute less. This is computed by taking the dot product of each position's hidden state with the feature's decoder direction, then normalizing to a 0-100% scale.</p>
+      <div class="visual-example">
+        <span style="font-size:0.82em;font-weight:600;color:#06b6d4;margin-right:0.5em">SH</span>
+        <span class="coda-token" style="background:hsl(200,55%,88%);color:hsl(200,50%,28%);opacity:0.35">101</span>
+        <span class="coda-token" style="background:hsl(45,55%,88%);color:hsl(45,50%,28%);opacity:0.90">1010</span>
+        <span class="coda-token" style="background:hsl(200,55%,88%);color:hsl(200,50%,28%);opacity:0.40">101</span>
+        <span class="coda-token" style="background:hsl(120,55%,88%);color:hsl(120,50%,28%);opacity:1.00">504</span>
+        <span class="coda-token" style="background:hsl(300,55%,88%);color:hsl(300,50%,28%);opacity:0.32">208</span>
+        <span style="font-size:0.78em;color:#888;margin-left:0.5em">3.45</span>
+      </div>
+      <p>In this example, coda types 1010 and 504 are vivid (high relevance), while 101 and 208 are faded (low relevance). The number on the right (3.45) is the feature's activation strength for this window.</p>
+      <p>Click any token to see which other features respond to that coda type (reverse lookup).</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>Logit lens</h2>
+      <p>The logit lens shows what this feature does to the model's next-coda predictions. "Promotes" means activating this feature pushes the model toward predicting these coda types next. "Suppresses" means it pushes away from them.</p>
+      <p>This is computed by projecting the feature's decoder direction through the model's output head. The effect size indicates how strongly the feature shifts the probability of each coda type.</p>
+      <p>Click any coda type in the logit lens to reverse-lookup which features care about it.</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>Co-firing features</h2>
+      <p>Features that tend to activate on the same windows as the selected feature. A co-firing rate of 89% means that when this feature fires, the co-firing feature also fires 89% of the time.</p>
+      <p>High co-firing suggests related or complementary information. For example, two clan-specific features for the same clan often co-fire, since they respond to the same set of coda sequences.</p>
+      <p>Click a co-firing feature to navigate directly to it.</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>Activation histogram</h2>
+      <p>Distribution of nonzero activation values for this feature. A tight, peaked distribution means the feature fires at a consistent strength. A wide distribution with a long tail means it fires at varying intensities, possibly encoding graded information (e.g., how strongly a coda pattern matches a clan's typical repertoire).</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>Selectivity</h2>
+      <p>Selectivity measures how concentrated a feature's activation is across clans. It is the fraction of total mean activation that comes from the dominant clan:</p>
+      <div class="diagram">selectivity = mean_activation[dominant_clan] / sum(mean_activation[all_clans])</div>
+      <p>A selectivity of 1.0 means the feature fires exclusively for one clan. A selectivity of 0.14 (1/7) means it fires equally across all seven clans. Features are classified as:</p>
+      <dl class="term-grid">
+        <dt>Clan-specific</dt>
+        <dd>Fires strongly for 1-2 clans (high selectivity). These encode cultural markers.</dd>
+        <dt>Universal</dt>
+        <dd>Fires across 5+ clans (low selectivity). These encode shared sequential or structural patterns.</dd>
+        <dt>Intermediate</dt>
+        <dd>Between the two. May encode patterns shared by a subset of clans.</dd>
+      </dl>
+    </div>
+
+    <div class="guide-section">
+      <h2>Keyboard shortcuts</h2>
+      <table class="shortcut-table">
+        <tr><td><kbd>&darr;</kbd> or <kbd>j</kbd></td><td>Next feature in the list</td></tr>
+        <tr><td><kbd>&uarr;</kbd> or <kbd>k</kbd></td><td>Previous feature in the list</td></tr>
+      </table>
+      <p style="margin-top:0.6em;font-size:0.85em;color:#888">Keyboard navigation works when the search box is not focused.</p>
+    </div>
+
+    <div class="guide-section">
+      <h2>Glossary</h2>
+      <dl class="term-grid">
+        <dt>Coda</dt>
+        <dd>A patterned series of clicks produced by sperm whales. Codas are the basic unit of sperm whale vocal communication.</dd>
+        <dt>Coda type</dt>
+        <dd>A category of coda defined by its click pattern (e.g., number and timing of clicks). Researchers assign type labels based on inter-click interval patterns.</dd>
+        <dt>Clan</dt>
+        <dd>A culturally-defined group of sperm whales that share a common coda repertoire. Seven clans are identified in the Pacific dataset.</dd>
+        <dt>CodaLM</dt>
+        <dd>A small GPT-2-style transformer (4 layers, 128-dim, 824K params) trained to predict the next coda in a vocal exchange.</dd>
+        <dt>SAE</dt>
+        <dd>Sparse autoencoder. Decomposes dense neural network representations into sparse, interpretable features. Uses TopK activation (k=12 of 512 features).</dd>
+        <dt>Feature</dt>
+        <dd>A single direction in the SAE's learned dictionary. Each feature responds to a specific pattern in the model's representations.</dd>
+        <dt>Alive feature</dt>
+        <dd>A feature that fires on more than 1% of input windows. Dead features (below 1%) are excluded from the explorer.</dd>
+        <dt>Firing rate</dt>
+        <dd>Percentage of input windows where a feature activates (nonzero activation).</dd>
+        <dt>Relevance</dt>
+        <dd>Per-position score indicating how much each coda in a window contributes to a feature's activation. Computed as the dot product of position-level hidden states with the feature's decoder direction.</dd>
+        <dt>Logit lens</dt>
+        <dd>Technique that projects a feature's decoder direction through the model's output head to see which coda types the feature promotes or suppresses in next-token prediction.</dd>
+        <dt>Co-firing</dt>
+        <dd>When two features activate on the same input window. High co-firing rate indicates the features encode related patterns.</dd>
+        <dt>Decoder direction</dt>
+        <dd>The column of the SAE's decoder weight matrix corresponding to a feature. This vector defines the feature's "meaning" in the model's representation space.</dd>
+        <dt>Window</dt>
+        <dd>A sequence of 32 consecutive codas from a vocal exchange, used as input to CodaLM.</dd>
+      </dl>
+    </div>
+
+    <footer><a href="https://gallen.dev">gallen.dev</a></footer>
+  </div>
+</body>
+</html>
