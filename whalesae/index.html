@@ -140,11 +140,19 @@ body {
   flex-shrink: 0;
 }
 
-.feature-item .f-sel {
+.feature-item .f-rate {
   margin-left: auto;
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
+  font-size: 0.8em;
+}
+
+.feature-item .f-sel {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
   font-size: 0.9em;
+  min-width: 32px;
+  text-align: right;
 }
 
 .feature-item .f-type {
@@ -931,6 +939,7 @@ function renderList() {
       <span class="f-idx">F${f.idx}</span>
       <span class="clan-dot" style="background:${colors[f.dominant_clan] || '#888'}"></span>
       <span class="f-type type-${f.type}">${f.type}</span>
+      <span class="f-rate">${(f.firing_rate * 100).toFixed(1)}%</span>
       <span class="f-sel">${f.selectivity.toFixed(2)}</span>
     </div>
   `).join('');
